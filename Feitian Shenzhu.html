@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飞天神猪教 - 神圣信仰</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#D85C9D', // 主粉色
+            secondary: '#9D4EDD', // 紫色
+            accent: '#FFD700', // 金色强调
+            dark: '#2A1641', // 深色背景
+            light: '#FFF5F8', // 浅色背景
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+            pigscript: ['"Pig Script"', 'cursive'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .text-shadow-lg {
+        text-shadow: 0 4px 8px rgba(0,0,0,0.25);
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .pig-script-char {
+        display: inline-block;
+        transform: rotate(-5deg);
+        transition: all 0.3s ease;
+      }
+      .pig-script-char:hover {
+        transform: rotate(5deg) scale(1.2);
+        color: theme('colors.accent');
+      }
+      .modal-backdrop {
+        backdrop-filter: blur(4px);
+      }
+      .form-input-focus {
+        @apply focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none;
+      }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
+  
+  <!-- 神猪文字体模拟 -->
+  <style>
+    @font-face {
+      font-family: 'Pig Script';
+      src: local('Arial');
+    }
+    
+    .pig-char-1::before { content: "🐷"; }
+    .pig-char-2::before { content: "🐽"; }
+    .pig-char-3::before { content: "✧"; }
+    .pig-char-4::before { content: "☁️"; }
+    .pig-char-5::before { content: "✨"; }
+    .pig-char-6::before { content: "⭕"; }
+    .pig-char-7::before { content: "🐾"; }
+    .pig-char-8::before { content: "🕉️"; }
+    .pig-char-9::before { content: "🌈"; }
+    .pig-char-10::before { content: "🌙"; }
+    .pig-char-11::before { content: "☀️"; }
+    .pig-char-12::before { content: "🍂"; }
+    .pig-char-13::before { content: "🌸"; }
+    .pig-char-14::before { content: "💫"; }
+    .pig-char-15::before { content: "🦋"; }
+    .pig-char-16::before { content: "🍎"; }
+    .pig-char-17::before { content: "🌾"; }
+    .pig-char-18::before { content: "🛕"; }
+    .pig-char-19::before { content: "🔔"; }
+    .pig-char-20::before { content: "🙏"; }
+  </style>
+</head>
+
+<body class="font-inter bg-gradient-to-br from-light to-pink-50 text-gray-800 overflow-x-hidden">
+  <!-- 导航栏 -->
+  <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-white/80 backdrop-blur-md shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xl">
+          <i class="fa fa-paw transform rotate-12"></i>
+        </div>
+        <h1 class="text-xl md:text-2xl font-bold text-primary" data-lang-key="religion_name">飞天神猪教</h1>
+      </div>
+      
+      <!-- 导航链接 -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#about" class="hover:text-primary transition-colors" data-lang-key="nav_about">关于我们</a>
+        <a href="#doctrine" class="hover:text-primary transition-colors" data-lang-key="nav_doctrine">教义</a>
+        <a href="#history" class="hover:text-primary transition-colors" data-lang-key="nav_history">历史</a>
+        <a href="#rituals" class="hover:text-primary transition-colors" data-lang-key="nav_rituals">仪式</a>
+        <a href="#join" class="bg-gradient-to-r from-primary to-secondary text-white px-5 py-2 rounded-full hover:shadow-lg transition-all transform hover:-translate-y-0.5" data-lang-key="nav_join">加入我们</a>
+        
+        <!-- 登录/注册按钮 -->
+        <div class="flex items-center space-x-3 ml-4">
+          <button id="login-btn" class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 transition-colors" data-lang-key="nav_login">登录</button>
+          <button id="register-btn" class="hidden md:block bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors" data-lang-key="nav_register">注册</button>
+          
+          <!-- 用户菜单 (登录后显示) -->
+          <div id="user-menu" class="hidden items-center space-x-2">
+            <span id="username-display" class="font-medium"></span>
+            <div class="relative">
+              <button id="user-menu-btn" class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <i class="fa fa-user"></i>
+              </button>
+              <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-50">
+                <a href="#profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary" data-lang-key="user_profile">个人资料</a>
+                <a href="#settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary" data-lang-key="user_settings">设置</a>
+                <div class="border-t border-gray-100 my-1"></div>
+                <button id="logout-btn" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary" data-lang-key="user_logout">退出登录</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 语言切换和移动端菜单按钮 -->
+      <div class="flex items-center space-x-3">
+        <button id="lang-zh" class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary hover:text-white transition-all">中</button>
+        <button id="lang-en" class="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center hover:bg-primary hover:text-white transition-all">En</button>
+        <button id="lang-pig" class="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center hover:bg-primary hover:text-white transition-all">🐷</button>
+        
+        <!-- 移动端菜单按钮 -->
+        <button id="menu-toggle" class="md:hidden text-gray-700 focus:outline-none">
+          <i class="fa fa-bars text-xl"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="md:hidden hidden bg-white border-t animate-fade-in">
+      <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+        <a href="#about" class="py-2 hover:text-primary transition-colors" data-lang-key="nav_about">关于我们</a>
+        <a href="#doctrine" class="py-2 hover:text-primary transition-colors" data-lang-key="nav_doctrine">教义</a>
+        <a href="#history" class="py-2 hover:text-primary transition-colors" data-lang-key="nav_history">历史</a>
+        <a href="#rituals" class="py-2 hover:text-primary transition-colors" data-lang-key="nav_rituals">仪式</a>
+        <a href="#join" class="bg-gradient-to-r from-primary to-secondary text-white px-5 py-3 rounded-full text-center hover:shadow-lg transition-all" data-lang-key="nav_join">加入我们</a>
+        
+        <!-- 移动端登录/注册 -->
+        <div class="flex space-x-3 pt-2">
+          <button id="mobile-login-btn" class="flex-1 px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 transition-colors" data-lang-key="nav_login">登录</button>
+          <button id="mobile-register-btn" class="flex-1 bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors" data-lang-key="nav_register">注册</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 登录模态框 -->
+  <div id="login-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black/50 modal-backdrop" id="login-backdrop"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
+      <div class="p-6 md:p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800" data-lang-key="login_title">信徒登录</h3>
+          <button id="close-login" class="text-gray-400 hover:text-gray-500">
+            <i class="fa fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <form id="login-form" class="space-y-5">
+          <div>
+            <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="login_email">邮箱</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-envelope text-gray-400"></i>
+              </div>
+              <input type="email" id="login-email" name="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="your@email.com" required>
+            </div>
+            <p id="login-email-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div>
+            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="login_password">密码</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-lock text-gray-400"></i>
+              </div>
+              <input type="password" id="login-password" name="password" class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="••••••••" required>
+              <button type="button" id="toggle-login-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                <i class="fa fa-eye-slash"></i>
+              </button>
+            </div>
+            <p id="login-password-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+              <label for="remember-me" class="ml-2 block text-sm text-gray-700" data-lang-key="login_remember">记住我</label>
+            </div>
+            <a href="#" class="text-sm text-primary hover:text-primary/80" data-lang-key="login_forgot">忘记密码?</a>
+          </div>
+          
+          <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-4 rounded-lg hover:opacity-90 transition-opacity" data-lang-key="login_submit">登录</button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600" data-lang-key="login_no_account">
+            还不是信徒? <button id="switch-to-register" class="font-medium text-primary hover:text-primary/80" data-lang-key="login_register_now">立即注册</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 注册模态框 -->
+  <div id="register-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black/50 modal-backdrop" id="register-backdrop"></div>
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden transform transition-all">
+      <div class="p-6 md:p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-2xl font-bold text-gray-800" data-lang-key="register_title">成为信徒</h3>
+          <button id="close-register" class="text-gray-400 hover:text-gray-500">
+            <i class="fa fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <form id="register-form" class="space-y-5">
+          <div>
+            <label for="register-name" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="register_name">姓名</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-user text-gray-400"></i>
+              </div>
+              <input type="text" id="register-name" name="name" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="你的姓名" required>
+            </div>
+            <p id="register-name-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div>
+            <label for="register-email" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="register_email">邮箱</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-envelope text-gray-400"></i>
+              </div>
+              <input type="email" id="register-email" name="email" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="your@email.com" required>
+            </div>
+            <p id="register-email-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div>
+            <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="register_password">密码</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-lock text-gray-400"></i>
+              </div>
+              <input type="password" id="register-password" name="password" class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="至少8个字符" required>
+              <button type="button" id="toggle-register-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                <i class="fa fa-eye-slash"></i>
+              </button>
+            </div>
+            <p id="register-password-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div>
+            <label for="register-confirm" class="block text-sm font-medium text-gray-700 mb-1" data-lang-key="register_confirm">确认密码</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fa fa-lock text-gray-400"></i>
+              </div>
+              <input type="password" id="register-confirm" name="confirm" class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg form-input-focus" placeholder="再次输入密码" required>
+              <button type="button" id="toggle-confirm-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500">
+                <i class="fa fa-eye-slash"></i>
+              </button>
+            </div>
+            <p id="register-confirm-error" class="mt-1 text-sm text-red-600 hidden"></p>
+          </div>
+          
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded" required>
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="terms" class="text-gray-600" data-lang-key="register_agree">我同意</label>
+              <a href="#" class="font-medium text-primary hover:text-primary/80" data-lang-key="register_terms">服务条款</a>
+              <span class="text-gray-600" data-lang-key="register_and">和</span>
+              <a href="#" class="font-medium text-primary hover:text-primary/80" data-lang-key="register_privacy">隐私政策</a>
+            </div>
+          </div>
+          
+          <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary text-white font-medium py-3 px-4 rounded-lg hover:opacity-90 transition-opacity" data-lang-key="register_submit">注册</button>
+        </form>
+        
+        <div class="mt-6 text-center">
+          <p class="text-sm text-gray-600" data-lang-key="register_have_account">
+            已是信徒? <button id="switch-to-login" class="font-medium text-primary hover:text-primary/80" data-lang-key="register_login_now">立即登录</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 英雄区域 -->
+  <header class="pt-28 pb-20 md:pt-40 md:pb-32 relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent z-0"></div>
+    
+    <!-- 装饰元素 -->
+    <div class="absolute top-20 left-10 w-20 h-20 rounded-full bg-accent/20 blur-xl animate-float"></div>
+    <div class="absolute bottom-10 right-20 w-32 h-32 rounded-full bg-secondary/20 blur-xl animate-float" style="animation-delay: 2s"></div>
+    
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="flex flex-col md:flex-row items-center">
+        <div class="md:w-1/2 mb-10 md:mb-0 text-center md:text-left">
+          <h1 class="text-[clamp(2.5rem,5vw,4rem)] font-bold leading-tight text-shadow-lg mb-6">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary" data-lang-key="hero_title">飞天神猪的启示</span>
+          </h1>
+          <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-lg mx-auto md:mx-0" data-lang-key="hero_desc">
+            追随神圣的飞天神猪，获得智慧、富足与内心的平和，踏上通往永恒幸福的道路。
+          </p>
+          <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center md:justify-start">
+            <a href="#doctrine" class="bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-full text-lg font-medium hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+              <span data-lang-key="hero_learn">了解教义</span>
+            </a>
+            <a href="#history" class="bg-white text-primary border-2 border-primary px-8 py-3 rounded-full text-lg font-medium hover:bg-primary/5 transition-all">
+              <span data-lang-key="hero_history">探索历史</span>
+            </a>
+          </div>
+        </div>
+        
+        <div class="md:w-1/2 flex justify-center">
+          <div class="relative w-64 h-64 md:w-80 md:h-80 animate-float">
+            <!-- 神猪图像 -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-br from-primary to-secondary p-1 shadow-xl">
+              <div class="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                <img src="https://picsum.photos/id/429/400/400" alt="飞天神猪" class="w-4/5 h-4/5 object-cover rounded-full transform rotate-12">
+                <!-- 翅膀装饰 -->
+                <div class="absolute -left-8 top-1/4 text-5xl text-accent/80">
+                  <i class="fa fa-feather-alt transform -rotate-45"></i>
+                </div>
+                <div class="absolute -right-8 top-1/4 text-5xl text-accent/80">
+                  <i class="fa fa-feather-alt transform rotate-45"></i>
+                </div>
+                <!-- 光环 -->
+                <div class="absolute -inset-4 rounded-full border-4 border-accent/30"></div>
+                <div class="absolute -inset-8 rounded-full border-2 border-accent/20"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 关于我们 -->
+  <section id="about" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="about_title">关于飞天神猪教</h2>
+        <div class="w-20 h-1 bg-primary mx-auto rounded-full"></div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-light rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-all">
+            <i class="fa fa-star"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4" data-lang-key="about_core">核心信仰</h3>
+          <p class="text-gray-600" data-lang-key="about_core_desc">
+            我们信仰飞天神猪是宇宙的创造者与守护者，它代表着智慧、富足与慈悲，引导信徒走向正道。
+          </p>
+        </div>
+        
+        <div class="bg-light rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-all">
+            <i class="fa fa-users"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4" data-lang-key="about_community">全球社区</h3>
+          <p class="text-gray-600" data-lang-key="about_community_desc">
+            飞天神猪教拥有遍布全球的信徒社区，我们彼此支持，共同实践教义，传播神猪的慈爱与智慧。
+          </p>
+        </div>
+        
+        <div class="bg-light rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+          <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-all">
+            <i class="fa fa-heart"></i>
+          </div>
+          <h3 class="text-xl font-semibold mb-4" data-lang-key="about_values">核心价值</h3>
+          <p class="text-gray-600" data-lang-key="about_values_desc">
+            我们倡导和平、包容、感恩与分享，相信通过践行这些美德，每个人都能获得内心的平静与生活的富足。
+          </p>
+        </div>
+      </div>
+      
+      <div class="mt-16 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-2xl p-8 md:p-12">
+        <div class="flex flex-col md:flex-row items-center">
+          <div class="md:w-2/3 mb-8 md:mb-0 md:pr-8">
+            <h3 class="text-2xl font-bold mb-4" data-lang-key="about_belief">我们的信仰</h3>
+            <p class="text-gray-700 mb-4" data-lang-key="about_belief_desc1">
+              飞天神猪教相信，宇宙由神圣的飞天神猪创造，它以无限的智慧和慈悲注视着世间万物。神猪并非实体存在，而是一种宇宙能量的体现，代表着生命的丰饶与精神的升华。
+            </p>
+            <p class="text-gray-700" data-lang-key="about_belief_desc2">
+              我们不追求盲目崇拜，而是通过实践教义、净化心灵、服务他人来接近神猪的智慧，最终实现个人与宇宙的和谐统一。
+            </p>
+          </div>
+          <div class="md:w-1/3">
+            <div class="relative rounded-xl overflow-hidden shadow-lg">
+              <img src="https://picsum.photos/id/433/600/400" alt="信仰象征" class="w-full h-auto">
+              <div class="absolute inset-0 bg-gradient-to-t from-dark/60 to-transparent flex items-end">
+                <p class="text-white p-4 text-sm" data-lang-key="about_symbol">飞天神猪教神圣象征</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 教义 -->
+  <section id="doctrine" class="py-20 bg-gradient-to-b from-white to-light">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="doctrine_title">神圣教义</h2>
+        <div class="w-20 h-1 bg-primary mx-auto rounded-full mb-6"></div>
+        <p class="text-gray-600 max-w-2xl mx-auto" data-lang-key="doctrine_desc">
+          飞天神猪教的教义是我们信仰与实践的基础，引导信徒在生活中践行真理，追求精神成长。
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div class="relative">
+          <div class="sticky top-24">
+            <div class="rounded-2xl overflow-hidden shadow-xl mb-6">
+              <img src="https://picsum.photos/id/447/800/600" alt="教义象征" class="w-full h-auto">
+            </div>
+            <div class="bg-white rounded-xl p-6 shadow-md">
+              <h3 class="text-xl font-semibold mb-3 text-primary" data-lang-key="doctrine_essence">教义精髓</h3>
+              <p class="text-gray-600 text-sm" data-lang-key="doctrine_essence_desc">
+                飞天神猪教的教义并非僵化的教条，而是活的智慧，它随着时代发展而演进，却始终保持核心精神不变。
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="space-y-8">
+          <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1">
+            <div class="flex items-start">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4 flex-shrink-0">1</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-3" data-lang-key="doctrine_1_title">万物一体</h3>
+                <p class="text-gray-600" data-lang-key="doctrine_1_desc">
+                  宇宙万物皆由飞天神猪的能量所创造，彼此相连，形成一个有机整体。伤害他人或自然，便是伤害自己。
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1">
+            <div class="flex items-start">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4 flex-shrink-0">2</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-3" data-lang-key="doctrine_2_title">智慧之道</h3>
+                <p class="text-gray-600" data-lang-key="doctrine_2_desc">
+                  追求知识与自我反省是接近神猪智慧的途径。我们应保持好奇心，不断学习，同时反思自身行为。
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1">
+            <div class="flex items-start">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4 flex-shrink-0">3</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-3" data-lang-key="doctrine_3_title">感恩与分享</h3>
+                <p class="text-gray-600" data-lang-key="doctrine_3_desc">
+                  对所拥有的一切心怀感恩，乐于分享自己的资源与快乐，这是获得真正富足的途径。
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1">
+            <div class="flex items-start">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4 flex-shrink-0">4</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-3" data-lang-key="doctrine_4_title">内心平和</h3>
+                <p class="text-gray-600" data-lang-key="doctrine_4_desc">
+                  通过冥想与正念，培养内心的平静。在喧嚣的世界中保持镇定，是神猪对信徒的教导。
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1">
+            <div class="flex items-start">
+              <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mr-4 flex-shrink-0">5</div>
+              <div>
+                <h3 class="text-xl font-semibold mb-3" data-lang-key="doctrine_5_title">慈悲为怀</h3>
+                <p class="text-gray-600" data-lang-key="doctrine_5_desc">
+                  以慈悲之心对待所有生命，包括自己。理解他人的痛苦，尽力帮助需要帮助的人，践行神猪的慈爱精神。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 发展历史 -->
+  <section id="history" class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="history_title">发展历史</h2>
+        <div class="w-20 h-1 bg-primary mx-auto rounded-full mb-6"></div>
+        <p class="text-gray-600 max-w-2xl mx-auto" data-lang-key="history_desc">
+          飞天神猪教的历史悠久而丰富，从古老的起源到现代的发展，见证了信仰的力量与传承。
+        </p>
+      </div>
+      
+      <!-- 时间线 -->
+      <div class="relative">
+        <!-- 中心线 -->
+        <div class="absolute left-0 md:left-1/2 top-0 bottom-0 w-1 bg-primary/20 transform md:translate-x-[-0.5rem]"></div>
+        
+        <!-- 时间点 1 -->
+        <div class="relative mb-16">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 md:pr-16 md:text-right mb-8 md:mb-0 md:text-right order-2 md:order-1">
+              <h3 class="text-2xl font-bold mb-2 text-primary" data-lang-key="history_1_title">起源传说</h3>
+              <p class="text-gray-600 mb-2" data-lang-key="history_1_date">公元前300年左右</p>
+              <p class="text-gray-700" data-lang-key="history_1_desc">
+                据古老文献记载，飞天神猪教起源于东方一个神秘山谷。一位名叫"明悟"的隐士在梦中见到一只有着翅膀的神猪，神猪传授给他宇宙的智慧与生命的奥秘。明悟醒来后，开始传播这些 teachings，逐渐形成了最初的信仰团体。
+              </p>
+            </div>
+            
+            <div class="absolute left-0 md:left-1/2 w-8 h-8 rounded-full bg-primary transform -translate-x-1/2 flex items-center justify-center text-white font-bold z-10">
+              1
+            </div>
+            
+            <div class="md:w-1/2 md:pl-16 order-1 md:order-2">
+              <div class="rounded-xl overflow-hidden shadow-lg">
+                <img src="https://picsum.photos/id/452/600/400" alt="起源传说" class="w-full h-auto">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 时间点 2 -->
+        <div class="relative mb-16">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 md:pr-16 mb-8 md:mb-0 order-1">
+              <div class="rounded-xl overflow-hidden shadow-lg">
+                <img src="https://picsum.photos/id/453/600/400" alt="教义编纂" class="w-full h-auto">
+              </div>
+            </div>
+            
+            <div class="absolute left-0 md:left-1/2 w-8 h-8 rounded-full bg-primary transform -translate-x-1/2 flex items-center justify-center text-white font-bold z-10">
+              2
+            </div>
+            
+            <div class="md:w-1/2 md:pl-16 order-2">
+              <h3 class="text-2xl font-bold mb-2 text-primary" data-lang-key="history_2_title">教义编纂</h3>
+              <p class="text-gray-600 mb-2" data-lang-key="history_2_date">公元5世纪</p>
+              <p class="text-gray-700" data-lang-key="history_2_desc">
+                随着信徒增多，第二代教主"慧能"收集整理了明悟的 teachings，编纂成《神猪经》，系统阐述了飞天神猪教的核心信仰与实践方法。这部经典成为后世信徒修行的指南，奠定了教派的理论基础。
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 时间点 3 -->
+        <div class="relative mb-16">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 md:pr-16 md:text-right mb-8 md:mb-0 md:text-right order-2 md:order-1">
+              <h3 class="text-2xl font-bold mb-2 text-primary" data-lang-key="history_3_title">传播与发展</h3>
+              <p class="text-gray-600 mb-2" data-lang-key="history_3_date">12-16世纪</p>
+              <p class="text-gray-700" data-lang-key="history_3_desc">
+                随着丝绸之路的繁荣，飞天神猪教逐渐向周边地区传播。传教士们带着《神猪经》远游，在亚洲、欧洲等地建立了寺庙和修行中心。这一时期，教派吸收了不同文化的元素，形成了多元化的发展局面。
+              </p>
+            </div>
+            
+            <div class="absolute left-0 md:left-1/2 w-8 h-8 rounded-full bg-primary transform -translate-x-1/2 flex items-center justify-center text-white font-bold z-10">
+              3
+            </div>
+            
+            <div class="md:w-1/2 md:pl-16 order-1 md:order-2">
+              <div class="rounded-xl overflow-hidden shadow-lg">
+                <img src="https://picsum.photos/id/458/600/400" alt="传播与发展" class="w-full h-auto">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 时间点 4 -->
+        <div class="relative mb-16">
+          <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 md:pr-16 mb-8 md:mb-0 order-1">
+              <div class="rounded-xl overflow-hidden shadow-lg">
+                <img src="https://picsum.photos/id/460/600/400" alt="现代复兴" class="w-full h-auto">
+              </div>
+            </div>
+            
+            <div class="absolute left-0 md:left-1/2 w-8 h-8 rounded-full bg-primary transform -translate-x-1/2 flex items-center justify-center text-white font-bold z-10">
+              4
+            </div>
+            
+            <div class="md:w-1/2 md:pl-16 order-2">
+              <h3 class="text-2xl font-bold mb-2 text-primary" data-lang-key="history_4_title">现代复兴</h3>
+              <p class="text-gray-600 mb-2" data-lang-key="history_4_date">20世纪末至今</p>
+              <p class="text-gray-700" data-lang-key="history_4_desc">
+                在经历了一段衰落期后，飞天神猪教在20世纪末迎来了复兴。随着人们对精神信仰的重新重视，越来越多的人被教义中的和平、包容与智慧所吸引。如今，全球已有超过百万信徒，形成了一个多元化的信仰社区。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 仪式与实践 -->
+  <section id="rituals" class="py-20 bg-gradient-to-b from-white to-light">
+    <div class="container mx-auto px-4">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="rituals_title">仪式与实践</h2>
+        <div class="w-20 h-1 bg-primary mx-auto rounded-full mb-6"></div>
+        <p class="text-gray-600 max-w-2xl mx-auto" data-lang-key="rituals_desc">
+          飞天神猪教的仪式与实践是信徒与神圣连接的重要方式，帮助我们在日常生活中践行信仰。
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/462/600/400" alt="晨间祈祷" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_1_title">晨间祈祷</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_1_desc">
+              每天清晨，信徒面向东方进行简短祈祷，感恩新的一天，祈求神猪的指引与祝福。祈祷时通常会手持象征神猪的小雕像或画像。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_1_time">10-15分钟</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/463/600/400" alt="满月庆典" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_2_title">满月庆典</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_2_desc">
+              每月满月之夜，信徒们聚集在一起，举行庆典仪式。包括集体冥想、分享心得、吟唱赞美诗，以及象征性的食物分享。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_2_time">2-3小时</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/464/600/400" alt="冥想实践" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_3_title">冥想实践</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_3_desc">
+              冥想是飞天神猪教重要的修行方式，帮助信徒平静心灵，连接神猪的智慧。通常采用专注呼吸或观想神猪形象的方法。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_3_time">每日20-30分钟</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/465/600/400" alt="年度朝圣" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_4_title">年度朝圣</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_4_desc">
+              每年春季，信徒们会前往位于发源地的神猪圣庙进行朝圣，参加为期三天的特殊仪式，聆听长老的教诲，净化心灵。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_4_time">3天</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/466/600/400" alt="感恩餐" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_5_title">感恩餐</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_5_desc">
+              每周一次，信徒家庭会准备一顿特别的"感恩餐"，在餐前表达对神猪和生活的感恩。餐食通常以素食为主，强调简单与健康。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_5_time">1小时</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+          <div class="h-56 overflow-hidden">
+            <img src="https://picsum.photos/id/467/600/400" alt="服务奉献" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-3" data-lang-key="rituals_6_title">服务奉献</h3>
+            <p class="text-gray-600 mb-4" data-lang-key="rituals_6_desc">
+              每月，信徒们会参与社区服务或慈善活动，践行"分享与慈悲"的教义。这被视为向神猪表达敬意的重要方式。
+            </p>
+            <div class="flex items-center text-sm text-primary">
+              <span data-lang-key="rituals_duration">时长：</span>
+              <span class="ml-2" data-lang-key="rituals_6_time">至少4小时</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 加入我们 -->
+  <section id="join" class="py-20 bg-gradient-to-r from-primary/90 to-secondary/90 text-white relative overflow-hidden">
+    <!-- 装饰元素 -->
+    <div class="absolute top-0 left-0 w-full h-full">
+      <div class="absolute top-10 left-10 w-40 h-40 rounded-full bg-white/5 blur-3xl"></div>
+      <div class="absolute bottom-10 right-10 w-60 h-60 rounded-full bg-white/5 blur-3xl"></div>
+      <div class="absolute top-1/2 left-1/2 w-80 h-80 rounded-full bg-white/5 blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+    
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6" data-lang-key="join_title">加入飞天神猪教</h2>
+        <p class="text-lg text-white/90" data-lang-key="join_desc">
+          无论你来自何方，拥有怎样的背景，飞天神猪教都向你敞开怀抱。加入我们，踏上灵性成长的旅程，与全球信徒共同追求智慧与和平。
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-colors">
+          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mb-6">
+            <i class="fa fa-heart"></i>
+          </div>
+          <h3 class="text-2xl font-semibold mb-4" data-lang-key="join_how_title">如何加入</h3>
+          <ul class="space-y-4 text-white/90">
+            <li class="flex items-start">
+              <i class="fa fa-check-circle mt-1 mr-3 text-accent"></i>
+              <span data-lang-key="join_how_1">了解并认同飞天神猪教的核心教义</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle mt-1 mr-3 text-accent"></i>
+              <span data-lang-key="join_how_2">参加至少三次社区聚会或线上活动</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle mt-1 mr-3 text-accent"></i>
+              <span data-lang-key="join_how_3">完成简单的入教仪式，表达你的信仰承诺</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-check-circle mt-1 mr-3 text-accent"></i>
+              <span data-lang-key="join_how_4">加入当地社区或线上群组，参与实践活动</span>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-8 hover:bg-white/15 transition-colors">
+          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl mb-6">
+            <i class="fa fa-paper-plane"></i>
+          </div>
+          <h3 class="text-2xl font-semibold mb-4" data-lang-key="join_contact_title">联系我们</h3>
+          <form class="space-y-4">
+            <div>
+              <label for="name" class="block text-left mb-2 text-sm" data-lang-key="join_name">姓名</label>
+              <input type="text" id="name" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent" placeholder="你的姓名">
+            </div>
+            <div>
+              <label for="email" class="block text-left mb-2 text-sm" data-lang-key="join_email">邮箱</label>
+              <input type="email" id="email" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent" placeholder="你的邮箱地址">
+            </div>
+            <div>
+              <label for="message" class="block text-left mb-2 text-sm" data-lang-key="join_message">留言</label>
+              <textarea id="message" rows="3" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-accent" placeholder="请告诉我们你对飞天神猪教的兴趣"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-accent text-dark font-medium py-3 rounded-lg hover:bg-accent/90 transition-colors" data-lang-key="join_submit">发送信息</button>
+          </form>
+        </div>
+      </div>
+      
+      <div class="mt-16 text-center">
+        <p class="text-white/80 mb-6" data-lang-key="join_community">加入我们的社区</p>
+        <div class="flex justify-center space-x-6">
+          <a href="#" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-accent hover:text-dark transition-all">
+            <i class="fa fa-facebook"></i>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-accent hover:text-dark transition-all">
+            <i class="fa fa-twitter"></i>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-accent hover:text-dark transition-all">
+            <i class="fa fa-instagram"></i>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-accent hover:text-dark transition-all">
+            <i class="fa fa-youtube-play"></i>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl hover:bg-accent hover:text-dark transition-all">
+            <i class="fa fa-weixin"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center space-x-2 mb-6">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white text-xl">
+              <i class="fa fa-paw transform rotate-12"></i>
+            </div>
+            <h3 class="text-xl font-bold" data-lang-key="religion_name">飞天神猪教</h3>
+          </div>
+          <p class="text-gray-400 mb-6" data-lang-key="footer_desc">
+            追随飞天神猪，获得智慧、富足与内心的平和。
+          </p>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-6" data-lang-key="footer_quick_links">快速链接</h4>
+          <ul class="space-y-3">
+            <li><a href="#about" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="nav_about">关于我们</a></li>
+            <li><a href="#doctrine" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="nav_doctrine">教义</a></li>
+            <li><a href="#history" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="nav_history">历史</a></li>
+            <li><a href="#rituals" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="nav_rituals">仪式</a></li>
+            <li><a href="#join" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="nav_join">加入我们</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-6" data-lang-key="footer_resources">资源</h4>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="footer_holy_book">《神猪经》</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="footer_prayers">祈祷文</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="footer_meditation">冥想指南</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="footer_events">活动日历</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors" data-lang-key="footer_blog">博客文章</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 class="text-lg font-semibold mb-6" data-lang-key="footer_contact">联系方式</h4>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <i class="fa fa-map-marker mt-1 mr-3 text-primary"></i>
+              <span class="text-gray-400" data-lang-key="footer_address">神猪圣城，和平大道123号</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-phone mt-1 mr-3 text-primary"></i>
+              <span class="text-gray-400" data-lang-key="footer_phone">+123 456 7890</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-envelope mt-1 mr-3 text-primary"></i>
+              <span class="text-gray-400" data-lang-key="footer_email">info@flyingpigreligion.com</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-gray-500 text-sm mb-4 md:mb-0" data-lang-key="footer_copyright">
+          &copy; 2023 飞天神猪教 版权所有
+        </p>
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-500 hover:text-primary text-sm transition-colors" data-lang-key="footer_privacy">隐私政策</a>
+          <a href="#" class="text-gray-500 hover:text-primary text-sm transition-colors" data-lang-key="footer_terms">使用条款</a>
+          <a href="#" class="text-gray-500 hover:text-primary text-sm transition-colors" data-lang-key="footer_cookies">Cookie政策</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 语言数据 -->
+  <script>
+    // 语言数据 - 中文、英文、神猪文
+    const translations = {
+      zh: {
+        // 新增登录注册相关翻译
+        nav_login: "登录",
+        nav_register: "注册",
+        user_profile: "个人资料",
+        user_settings: "设置",
+        user_logout: "退出登录",
+        login_title: "信徒登录",
+        login_email: "邮箱",
+        login_password: "密码",
+        login_remember: "记住我",
+        login_forgot: "忘记密码?",
+        login_submit: "登录",
+        login_no_account: "还不是信徒?",
+        login_register_now: "立即注册",
+        register_title: "成为信徒",
+        register_name: "姓名",
+        register_email: "邮箱",
+        register_password: "密码",
+        register_confirm: "确认密码",
+        register_agree: "我同意",
+        register_terms: "服务条款",
+        register_and: "和",
+        register_privacy: "隐私政策",
+        register_submit: "注册",
+        register_have_account: "已是信徒?",
+        register_login_now: "立即登录",
+        
+        // 原有翻译保持不变
+        religion_name: "飞天神猪教",
+        nav_about: "关于我们",
+        nav_doctrine: "教义",
+        nav_history: "历史",
+        nav_rituals: "仪式",
+        nav_join: "加入我们",
+        
+        hero_title: "飞天神猪的启示",
+        hero_desc: "追随神圣的飞天神猪，获得智慧、富足与内心的平和，踏上通往永恒幸福的道路。",
+        hero_learn: "了解教义",
+        hero_history: "探索历史",
+        
+        about_title: "关于飞天神猪教",
+        about_core: "核心信仰",
+        about_core_desc: "我们信仰飞天神猪是宇宙的创造者与守护者，它代表着智慧、富足与慈悲，引导信徒走向正道。",
+        about_community: "全球社区",
+        about_community_desc: "飞天神猪教拥有遍布全球的信徒社区，我们彼此支持，共同实践教义，传播神猪的慈爱与智慧。",
+        about_values: "核心价值",
+        about_values_desc: "我们倡导和平、包容、感恩与分享，相信通过践行这些美德，每个人都能获得内心的平静与生活的富足。",
+        about_belief: "我们的信仰",
+        about_belief_desc1: "飞天神猪教相信，宇宙由神圣的飞天神猪创造，它以无限的智慧和慈悲注视着世间万物。神猪并非实体存在，而是一种宇宙能量的体现，代表着生命的丰饶与精神的升华。",
+        about_belief_desc2: "我们不追求盲目崇拜，而是通过实践教义、净化心灵、服务他人来接近神猪的智慧，最终实现个人与宇宙的和谐统一。",
+        about_symbol: "飞天神猪教神圣象征",
+        
+        doctrine_title: "神圣教义",
+        doctrine_desc: "飞天神猪教的教义是我们信仰与实践的基础，引导信徒在生活中践行真理，追求精神成长。",
+        doctrine_essence: "教义精髓",
+        doctrine_essence_desc: "飞天神猪教的教义并非僵化的教条，而是活的智慧，它随着时代发展而演进，却始终保持核心精神不变。",
+        doctrine_1_title: "万物一体",
+        doctrine_1_desc: "宇宙万物皆由飞天神猪的能量所创造，彼此相连，形成一个有机整体。伤害他人或自然，便是伤害自己。",
+        doctrine_2_title: "智慧之道",
+        doctrine_2_desc: "追求知识与自我反省是接近神猪智慧的途径。我们应保持好奇心，不断学习，同时反思自身行为。",
+        doctrine_3_title: "感恩与分享",
+        doctrine_3_desc: "对所拥有的一切心怀感恩，乐于分享自己的资源与快乐，这是获得真正富足的途径。",
+        doctrine_4_title: "内心平和",
+        doctrine_4_desc: "通过冥想与正念，培养内心的平静。在喧嚣的世界中保持镇定，是神猪对信徒的教导。",
+        doctrine_5_title: "慈悲为怀",
+        doctrine_5_desc: "以慈悲之心对待所有生命，包括自己。理解他人的痛苦，尽力帮助需要帮助的人，践行神猪的慈爱精神。",
+        
+        history_title: "发展历史",
+        history_desc: "飞天神猪教的历史悠久而丰富，从古老的起源到现代的发展，见证了信仰的力量与传承。",
+        history_1_title: "起源传说",
+        history_1_date: "公元前300年左右",
+        history_1_desc: "据古老文献记载，飞天神猪教起源于东方一个神秘山谷。一位名叫\"明悟\"的隐士在梦中见到一只有着翅膀的神猪，神猪传授给他宇宙的智慧与生命的奥秘。明悟醒来后，开始传播这些 teachings，逐渐形成了最初的信仰团体。",
+        history_2_title: "教义编纂",
+        history_2_date: "公元5世纪",
+        history_2_desc: "随着信徒增多，第二代教主\"慧能\"收集整理了明悟的 teachings，编纂成《神猪经》，系统阐述了飞天神猪教的核心信仰与实践方法。这部经典成为后世信徒修行的指南，奠定了教派的理论基础。",
+        history_3_title: "传播与发展",
+        history_3_date: "12-16世纪",
+        history_3_desc: "随着丝绸之路的繁荣，飞天神猪教逐渐向周边地区传播。传教士们带着《神猪经》远游，在亚洲、欧洲等地建立了寺庙和修行中心。这一时期，教派吸收了不同文化的元素，形成了多元化的发展局面。",
+        history_4_title: "现代复兴",
+        history_4_date: "20世纪末至今",
+        history_4_desc: "在经历了一段衰落期后，飞天神猪教在20世纪末迎来了复兴。随着人们对精神信仰的重新重视，越来越多的人被教义中的和平、包容与智慧所吸引。如今，全球已有超过百万信徒，形成了一个多元化的信仰社区。",
+        
+        rituals_title: "仪式与实践",
+        rituals_desc: "飞天神猪教的仪式与实践是信徒与神圣连接的重要方式，帮助我们在日常生活中践行信仰。",
+        rituals_duration: "时长：",
+        rituals_1_title: "晨间祈祷",
+        rituals_1_desc: "每天清晨，信徒面向东方进行简短祈祷，感恩新的一天，祈求神猪的指引与祝福。祈祷时通常会手持象征神猪的小雕像或画像。",
+        rituals_1_time: "10-15分钟",
+        rituals_2_title: "满月庆典",
+        rituals_2_desc: "每月满月之夜，信徒们聚集在一起，举行庆典仪式。包括集体冥想、分享心得、吟唱赞美诗，以及象征性的食物分享。",
+        rituals_2_time: "2-3小时",
+        rituals_3_title: "冥想实践",
+        rituals_3_desc: "冥想是飞天神猪教重要的修行方式，帮助信徒平静心灵，连接神猪的智慧。通常采用专注呼吸或观想神猪形象的方法。",
+        rituals_3_time: "每日20-30分钟",
+        rituals_4_title: "年度朝圣",
+        rituals_4_desc: "每年春季，信徒们会前往位于发源地的神猪圣庙进行朝圣，参加为期三天的特殊仪式，聆听长老的教诲，净化心灵。",
+        rituals_4_time: "3天",
+        rituals_5_title: "感恩餐",
+        rituals_5_desc: "每周一次，信徒家庭会准备一顿特别的\"感恩餐\"，在餐前表达对神猪和生活的感恩。餐食通常以素食为主，强调简单与健康。",
+        rituals_5_time: "1小时",
+        rituals_6_title: "服务奉献",
+        rituals_6_desc: "每月，信徒们会参与社区服务或慈善活动，践行\"分享与慈悲\"的教义。这被视为向神猪表达敬意的重要方式。",
+        rituals_6_time: "至少4小时",
+        
+        join_title: "加入飞天神猪教",
+        join_desc: "无论你来自何方，拥有怎样的背景，飞天神猪教都向你敞开怀抱。加入我们，踏上灵性成长的旅程，与全球信徒共同追求智慧与和平。",
+        join_how_title: "如何加入",
+        join_how_1: "了解并认同飞天神猪教的核心教义",
+        join_how_2: "参加至少三次社区聚会或线上活动",
+        join_how_3: "完成简单的入教仪式，表达你的信仰承诺",
+        join_how_4: "加入当地社区或线上群组，参与实践活动",
+        join_contact_title: "联系我们",
+        join_name: "姓名",
+        join_email: "邮箱",
+        join_message: "留言",
+        join_submit: "发送信息",
+        join_community: "加入我们的社区",
+        
+        footer_desc: "追随飞天神猪，获得智慧、富足与内心的平和。",
+        footer_quick_links: "快速链接",
+        footer_resources: "资源",
+        footer_holy_book: "《神猪经》",
+        footer_prayers: "祈祷文",
+        footer_meditation: "冥想指南",
+        footer_events: "活动日历",
+        footer_blog: "博客文章",
+        footer_contact: "联系方式",
+        footer_address: "神猪圣城，和平大道123号",
+        footer_phone: "+123 456 7890",
+        footer_email: "info@flyingpigreligion.com",
+        footer_copyright: "&copy; 2023 飞天神猪教 版权所有",
+        footer_privacy: "隐私政策",
+        footer_terms: "使用条款",
+        footer_cookies: "Cookie政策"
+      },
+      
+      en: {
+        // 新增登录注册相关翻译
+        nav_login: "Login",
+        nav_register: "Register",
+        user_profile: "Profile",
+        user_settings: "Settings",
+        user_logout: "Logout",
+        login_title: "Believer Login",
+        login_email: "Email",
+        login_password: "Password",
+        login_remember: "Remember me",
+        login_forgot: "Forgot password?",
+        login_submit: "Login",
+        login_no_account: "Not a believer yet?",
+        login_register_now: "Register now",
+        register_title: "Become a Believer",
+        register_name: "Name",
+        register_email: "Email",
+        register_password: "Password",
+        register_confirm: "Confirm Password",
+        register_agree: "I agree to the",
+        register_terms: "Terms of Service",
+        register_and: "and",
+        register_privacy: "Privacy Policy",
+        register_submit: "Register",
+        register_have_account: "Already a believer?",
+        register_login_now: "Login now",
+        
+        // 原有翻译保持不变
+        religion_name: "Flying Pig Religion",
+        nav_about: "About Us",
+        nav_doctrine: "Doctrine",
+        nav_history: "History",
+        nav_rituals: "Rituals",
+        nav_join: "Join Us",
+        
+        hero_title: "Revelation of the Flying Pig",
+        hero_desc: "Follow the sacred Flying Pig to gain wisdom, abundance, and inner peace, embarking on the path to eternal happiness.",
+        hero_learn: "Learn Doctrine",
+        hero_history: "Explore History",
+        
+        about_title: "About Flying Pig Religion",
+        about_core: "Core Belief",
+        about_core_desc: "We believe that the Flying Pig is the creator and guardian of the universe, representing wisdom, abundance, and compassion, guiding believers on the right path.",
+        about_community: "Global Community",
+        about_community_desc: "The Flying Pig Religion has信徒 communities worldwide. We support each other, practice the teachings together, and spread the love and wisdom of the divine pig.",
+        about_values: "Core Values",
+        about_values_desc: "We advocate peace, inclusiveness, gratitude, and sharing. We believe that by practicing these virtues, everyone can attain inner peace and abundant life.",
+        about_belief: "Our Belief",
+        about_belief_desc1: "The Flying Pig Religion believes that the universe was created by the sacred Flying Pig, which watches over all things with infinite wisdom and compassion. The divine pig is not a physical entity but an embodiment of cosmic energy, representing the abundance of life and spiritual elevation.",
+        about_belief_desc2: "We do not pursue blind worship, but approach the wisdom of the divine pig through practicing the teachings, purifying the mind, and serving others, ultimately achieving harmony between the individual and the universe.",
+        about_symbol: "Sacred Symbol of Flying Pig Religion",
+        
+        doctrine_title: "Sacred Doctrine",
+        doctrine_desc: "The doctrine of the Flying Pig Religion is the foundation of our faith and practice, guiding believers to live according to truth and pursue spiritual growth.",
+        doctrine_essence: "Essence of Doctrine",
+        doctrine_essence_desc: "The doctrine of the Flying Pig Religion is not rigid dogma but living wisdom that evolves with the times while retaining its core spirit.",
+        doctrine_1_title: "Unity of All Things",
+        doctrine_1_desc: "All things in the universe are created by the energy of the Flying Pig, interconnected to form an organic whole. To harm others or nature is to harm oneself.",
+        doctrine_2_title: "Path of Wisdom",
+        doctrine_2_desc: "Pursuing knowledge and self-reflection is the path to approaching the wisdom of the divine pig. We should maintain curiosity, continue learning, and reflect on our actions.",
+        doctrine_3_title: "Gratitude and Sharing",
+        doctrine_3_desc: "Being grateful for all we have and joyfully sharing our resources and happiness is the path to true abundance.",
+        doctrine_4_title: "Inner Peace",
+        doctrine_4_desc: "Cultivating inner peace through meditation and mindfulness. Maintaining calm in a noisy world is the divine pig's teaching to believers.",
+        doctrine_5_title: "Compassion",
+        doctrine_5_desc: "Treating all life with compassion, including oneself. Understanding others' suffering and doing our best to help those in need, practicing the loving spirit of the divine pig.",
+        
+        history_title: "Development History",
+        history_desc: "The history of the Flying Pig Religion is long and rich, witnessing the power and inheritance of faith from ancient origins to modern development.",
+        history_1_title: "Origin Legend",
+        history_1_date: "Circa 300 BCE",
+        history_1_desc: "According to ancient texts, the Flying Pig Religion originated in a mysterious valley in the East. A hermit named 'Mingwu' dreamed of a winged divine pig that imparted cosmic wisdom and the mysteries of life. Upon waking, Mingwu began spreading these teachings, gradually forming the first faith community.",
+        history_2_title: "Doctrine Compilation",
+        history_2_date: "5th Century CE",
+        history_2_desc: "As the number of believers grew, the second patriarch 'Huineng' collected and organized Mingwu's teachings, compiling them into 'The Scripture of the Divine Pig,' which systematically expounded the core beliefs and practices of the Flying Pig Religion. This classic became a guide for later believers and laid the theoretical foundation of the religion.",
+        history_3_title: "Spread and Development",
+        history_3_date: "12th-16th Centuries",
+        history_3_desc: "With the prosperity of the Silk Road, the Flying Pig Religion gradually spread to surrounding regions. Missionaries traveled with 'The Scripture of the Divine Pig,' establishing temples and practice centers in Asia, Europe, and other places. During this period, the religion absorbed elements from different cultures, forming a diversified development pattern.",
+        history_4_title: "Modern Revival",
+        history_4_date: "Late 20th Century-Present",
+        history_4_desc: "After a period of decline, the Flying Pig Religion experienced a revival in the late 20th century. As people renewed their focus on spiritual beliefs, more and more were attracted by the peace, inclusiveness, and wisdom in the doctrine. Today, there are over a million believers worldwide, forming a diverse faith community.",
+        
+        rituals_title: "Rituals and Practices",
+        rituals_desc: "The rituals and practices of the Flying Pig Religion are important ways for believers to connect with the divine, helping us practice our faith in daily life.",
+        rituals_duration: "Duration:",
+        rituals_1_title: "Morning Prayer",
+        rituals_1_desc: "Each morning, believers pray briefly facing east, giving thanks for the new day and seeking guidance and blessings from the divine pig. They usually hold a small statue or image symbolizing the divine pig during prayer.",
+        rituals_1_time: "10-15 minutes",
+        rituals_2_title: "Full Moon Celebration",
+        rituals_2_desc: "On the night of each full moon, believers gather for a celebration ceremony. This includes group meditation, sharing insights, chanting hymns, and symbolic food sharing.",
+        rituals_2_time: "2-3 hours",
+        rituals_3_title: "Meditation Practice",
+        rituals_3_desc: "Meditation is an important practice in the Flying Pig Religion, helping believers calm their minds and connect with the wisdom of the divine pig. It usually involves focused breathing or visualizing the image of the divine pig.",
+        rituals_3_time: "20-30 minutes daily",
+        rituals_4_title: "Annual Pilgrimage",
+        rituals_4_desc: "Each spring, believers make a pilgrimage to the Divine Pig Temple at the origin, participating in special ceremonies over three days, listening to teachings from elders, and purifying their minds.",
+        rituals_4_time: "3 days",
+        rituals_5_title: "Gratitude Meal",
+        rituals_5_desc: "Once a week, believer families prepare a special 'gratitude meal,' expressing gratitude to the divine pig and life before eating. The meal is usually vegetarian, emphasizing simplicity and health.",
+        rituals_5_time: "1 hour",
+        rituals_6_title: "Service and Dedication",
+        rituals_6_desc: "Each month, believers participate in community service or charitable activities, practicing the doctrine of 'sharing and compassion.' This is regarded as an important way to express respect to the divine pig.",
+        rituals_6_time: "At least 4 hours",
+        
+        join_title: "Join the Flying Pig Religion",
+        join_desc: "No matter where you come from or what background you have, the Flying Pig Religion opens its arms to you. Join us, embark on a journey of spiritual growth, and pursue wisdom and peace with believers worldwide.",
+        join_how_title: "How to Join",
+        join_how_1: "Understand and identify with the core doctrines of the Flying Pig Religion",
+        join_how_2: "Attend at least three community gatherings or online activities",
+        join_how_3: "Complete a simple initiation ceremony, expressing your faith commitment",
+        join_how_4: "Join a local community or online group and participate in practice activities",
+        join_contact_title: "Contact Us",
+        join_name: "Name",
+        join_email: "Email",
+        join_message: "Message",
+        join_submit: "Send Message",
+        join_community: "Join our community",
+        
+        footer_desc: "Follow the Flying Pig to gain wisdom, abundance, and inner peace.",
+        footer_quick_links: "Quick Links",
+        footer_resources: "Resources",
+        footer_holy_book: "The Scripture of the Divine Pig",
+        footer_prayers: "Prayers",
+        footer_meditation: "Meditation Guide",
+        footer_events: "Event Calendar",
+        footer_blog: "Blog Articles",
+        footer_contact: "Contact Information",
+        footer_address: "Divine Pig Holy City, 123 Peace Avenue",
+        footer_phone: "+123 456 7890",
+        footer_email: "info@flyingpigreligion.com",
+        footer_copyright: "&copy; 2023 Flying Pig Religion. All rights reserved.",
+        footer_privacy: "Privacy Policy",
+        footer_terms: "Terms of Service",
+        footer_cookies: "Cookie Policy"
+      },
+      
+      // 神猪文保持不变
+      pig: {
+        nav_login: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-20"></span>',
+        nav_register: '<span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-7"></span>',
+        user_profile: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-5"></span>',
+        user_settings: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-11"></span>',
+        user_logout: '<span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-8"></span>',
+        login_title: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-8"></span>',
+        login_email: '<span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-7"></span>',
+        login_password: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-18"></span>',
+        login_remember: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-7"></span>',
+        login_forgot: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-10"></span>',
+        login_submit: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-20"></span>',
+        login_no_account: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-15"></span>',
+        login_register_now: '<span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-20"></span>',
+        register_title: '<span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-7"></span>',
+        register_name: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-8"></span>',
+        register_email: '<span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-7"></span>',
+        register_password: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-18"></span>',
+        register_confirm: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-8"></span>',
+        register_agree: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-8"></span>',
+        register_terms: '<span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-20"></span>',
+        register_and: '<span class="pig-script-char pig-char-9"></span>',
+        register_privacy: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-3"></span>',
+        register_submit: '<span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-20"></span>',
+        register_have_account: '<span class="pig-script-char pig-7"></span><span class="pig-script-char pig-char-15"></span>',
+        register_login_now: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-20"></span>',
+        
+        // 原有神猪文翻译保持不变
+        religion_name: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-2"></span><span class="pig-script-char pig-char-6"></span>',
+        nav_about: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-7"></span>',
+        nav_doctrine: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span>',
+        nav_history: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span>',
+        nav_rituals: '<span class="pig-script-char pig-char-19"></span><span class="pig-script-char pig-char-20"></span>',
+        nav_join: '<span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-7"></span>',
+        
+        hero_title: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span>',
+        hero_desc: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-17"></span><span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-14"></span>',
+        hero_learn: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span>',
+        hero_history: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span>',
+        
+        about_title: '<span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-6"></span>',
+        about_core: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-8"></span>',
+        about_core_desc: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-18"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-17"></span>',
+        about_community: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-9"></span>',
+        about_community_desc: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-20"></span>',
+        about_values: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-15"></span>',
+        about_values_desc: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-16"></span><span class="pig-script-char pig-char-17"></span><span class="pig-script-char pig-char-14"></span>',
+        about_belief: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-8"></span>',
+        about_belief_desc1: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-18"></span><span class="pig-script-char pig-char-5"></span>',
+        about_belief_desc2: '<span class="pig-script-char pig-7"></span><span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-14"></span><span class="pig-script-char pig-char-9"></span>',
+        about_symbol: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-18"></span>',
+        
+        doctrine_title: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span>',
+        doctrine_desc: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-14"></span>',
+        doctrine_essence: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-14"></span>',
+        doctrine_essence_desc: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span>',
+        doctrine_1_title: '<span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-8"></span>',
+        doctrine_1_desc: '<span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-18"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-17"></span>',
+        doctrine_2_title: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span>',
+        doctrine_2_desc: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-14"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span>',
+        doctrine_3_title: '<span class="pig-script-char pig-char-16"></span><span class="pig-script-char pig-char-17"></span>',
+        doctrine_3_desc: '<span class="pig-script-char pig-char-16"></span><span class="pig-script-char pig-char-17"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-14"></span><span class="pig-script-char pig-char-15"></span>',
+        doctrine_4_title: '<span class="pig-script-char pig-char-14"></span><span class="pig-script-char pig-char-8"></span>',
+        doctrine_4_desc: '<span class="pig-script-char pig-char-19"></span><span class="pig-script-char pig-char-14"></span><span class="pig-script-char pig-char-7"></span><span class="pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-5"></span>',
+        doctrine_5_title: '<span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-7"></span>',
+        doctrine_5_desc: '<span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-15"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span>',
+        
+        history_title: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span>',
+        history_desc: '<span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span><span class="pig-script-char pig-char-8"></span><span class="pig-script-char pig-char-14"></span>',
+        history_1_title: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-5"></span>',
+        history_1_date: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-300"></span>',
+        history_1_desc: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-4"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-8"></span>',
+        history_2_title: '<span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-10"></span>',
+        history_2_date: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-5"></span>',
+        history_2_desc: '<span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-5"></span><span class="pig-script-char pig-char-3"></span><span class="pig-script-char pig-char-18"></span><span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-11"></span>',
+        history_3_title: '<span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-11"></span>',
+        history_3_date: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-12"></span><span class="pig-script-char pig-char-16"></span>',
+        history_3_desc: '<span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-11"></span><span class="pig-script-char pig-char-18"></span>',
+        history_4_title: '<span class="pig-script-char pig-char-11"></span><span class="pig-script-char pig-char-15"></span>',
+        history_4_date: '<span class="pig-script-char pig-char-10"></span><span class="pig-script-char pig-char-20"></span>',
+        history_4_desc: '<span class="pig-script-char pig-char-11"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-9"></span><span class="pig-script-char pig-char-15"></span>',
+        
+        rituals_title: '<span class="pig-script-char pig-char-19"></span><span class="pig-script-char pig-char-20"></span>',
+        rituals_desc: '<span class="pig-script-char pig-char-19"></span><span class="pig-script-char pig-char-20"></span><span class="pig-script-char pig-char-1"></span><span class="pig-script-char pig-char-6"></span><span class="pig-script-char pig-char-7"></span><span class="pig-script-char pig-char-14"></span>',
+        rituals_duration: '<span class="pig-script-char pig-char-3"></span>:',
+        rituals_1_title: '<span class="pig-script-
