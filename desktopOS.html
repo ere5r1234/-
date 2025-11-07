@@ -1,0 +1,2281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>飞天神猪教 - 神圣桌面</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#D85C9D', // 主粉色
+            secondary: '#9D4EDD', // 紫色
+            accent: '#FFD700', // 金色强调
+            dark: '#2A1641', // 深色背景
+            light: '#FFF5F8', // 浅色背景
+            win: '#0F172A', // 桌面背景色
+          },
+          fontFamily: {
+            inter: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+            'fade-in': 'fadeIn 0.3s ease-in-out',
+            'fade-out': 'fadeOut 0.3s ease-in-out',
+            'toast-in': 'toastIn 0.3s ease-out',
+            'toast-out': 'toastOut 0.3s ease-in',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translate(-50%, -55%)' },
+              '100%': { opacity: '1', transform: 'translate(-50%, -50%)' },
+            },
+            fadeOut: {
+              '0%': { opacity: '1', transform: 'translate(-50%, -50%)' },
+              '100%': { opacity: '0', transform: 'translate(-50%, -45%)' },
+            },
+            toastIn: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            toastOut: {
+              '0%': { opacity: '1', transform: 'translateY(0)' },
+              '100%': { opacity: '0', transform: 'translateY(20px)' },
+            }
+          }
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .window-drag {
+        -webkit-app-region: drag;
+      }
+      .window-no-drag {
+        -webkit-app-region: no-drag;
+      }
+      .desktop-icon-hover {
+        @apply hover:bg-white/20 transition-all duration-300 rounded transform hover:-translate-y-1;
+      }
+      .widget-card {
+        @apply bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-800;
+      }
+      .quote-style {
+        @apply border-l-4 border-accent pl-4 italic text-gray-300 my-3;
+      }
+      .taskbar-item {
+        @apply w-10 h-10 rounded flex items-center justify-center bg-gray-800 hover:bg-gray-700 transition-colors border border-transparent;
+      }
+      .taskbar-item-active {
+        @apply bg-primary/30 border-primary;
+      }
+      .toast {
+        @apply fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-toast-in;
+      }
+    }
+  </style>
+</head>
+
+<body class="font-inter bg-win text-white overflow-hidden h-screen relative">
+  <!-- 背景水印 -->
+  <div id="background-watermark" class="absolute inset-0 opacity-5 pointer-events-none">
+    <div class="w-full h-full flex items-center justify-center">
+      <i class="fa fa-paw text-[500px] text-accent transform rotate-12 animate-float"></i>
+    </div>
+  </div>
+
+  <!-- 桌面顶部小组件区域 -->
+  <div id="desktop-widgets" class="absolute top-6 right-6 flex flex-col space-y-4 z-10">
+    <!-- 日历小组件 -->
+    <div class="widget-card w-48">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-accent">神圣日历</h4>
+        <i class="fa fa-calendar text-gray-400"></i>
+      </div>
+      <div class="text-center">
+        <div id="widget-date" class="text-2xl font-bold text-white"></div>
+        <div id="widget-weekday" class="text-gray-400 text-sm mt-1"></div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-gray-800 text-xs text-gray-500 text-center">
+        今日宜：冥想、感恩
+      </div>
+    </div>
+
+    <!-- 快捷提示小组件 -->
+    <div class="widget-card w-48">
+      <div class="flex justify-between items-center mb-3">
+        <h4 class="font-semibold text-primary">神猪启示</h4>
+        <i class="fa fa-lightbulb-o text-gray-400"></i>
+      </div>
+      <div class="quote-style text-sm">
+        "心存善念，万物皆灵"
+      </div>
+      <div class="text-xs text-gray-400 mt-2">
+        今日是践行教义的美好日子
+      </div>
+    </div>
+  </div>
+
+  <!-- 桌面图标区域 -->
+  <div class="h-[calc(100vh-48px)] p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 pt-24">
+    <!-- 登录图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('login-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-user-circle"></i>
+      </div>
+      <span class="text-sm text-center">登录</span>
+    </div>
+
+    <!-- 教义图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('doctrine-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-book"></i>
+      </div>
+      <span class="text-sm text-center">神圣教义</span>
+    </div>
+
+
+
+    <!-- 关于我们图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('about-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-400 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-info-circle"></i>
+      </div>
+      <span class="text-sm text-center">关于我们</span>
+    </div>
+
+    <!-- 个人中心图标（登录后显示） -->
+    <div id="profile-icon" class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer hidden" onclick="openWindow('profile-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-accent to-yellow-500 flex items-center justify-center text-2xl mb-2 shadow-lg relative">
+        <i class="fa fa-user"></i>
+        <!-- 新消息通知指示器 -->
+        <span id="profile-notification" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center hidden">!</span>
+      </div>
+      <span id="profile-username" class="text-sm text-center">个人中心</span>
+    </div>
+
+    <!-- 设置图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('settings-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-gray-500 to-gray-400 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-cog"></i>
+      </div>
+      <span class="text-sm text-center">系统设置</span>
+    </div>
+
+    <!-- 帮助中心图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('help-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-500 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-question-circle"></i>
+      </div>
+      <span class="text-sm text-center">帮助中心</span>
+    </div>
+
+    <!-- 发展历史图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('history-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-history"></i>
+      </div>
+      <span class="text-sm text-center">发展历史</span>
+    </div>
+
+    <!-- 仪式实践图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('ritual-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-magic"></i>
+      </div>
+      <span class="text-sm text-center">仪式实践</span>
+    </div>
+
+    <!-- 教徒留言图标 -->
+    <div class="desktop-icon-hover w-24 flex flex-col items-center cursor-pointer" onclick="openWindow('message-window')">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center text-2xl mb-2 shadow-lg">
+        <i class="fa fa-comments"></i>
+      </div>
+      <span class="text-sm text-center">教徒留言</span>
+    </div>
+  </div>
+
+  <!-- 开始菜单 -->
+  <div id="start-menu" class="fixed bottom-12 left-4 w-64 bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-50 hidden animate-fade-in">
+    <div class="p-4 border-b border-gray-800">
+      <div class="flex items-center">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-xl mr-3 shadow-md">
+          <i class="fa fa-paw transform rotate-12"></i>
+        </div>
+        <div>
+          <div class="font-bold text-white">飞天神猪桌面系统</div>
+          <div class="text-xs text-gray-400">版本 1.0.0</div>
+        </div>
+      </div>
+    </div>
+    <div class="py-2">
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('doctrine-window'); closeStartMenu()">
+        <i class="fa fa-book w-6 text-blue-400 mr-3"></i>
+        <span>神圣教义</span>
+      </button>
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('history-window'); closeStartMenu()">
+        <i class="fa fa-history w-6 text-amber-400 mr-3"></i>
+        <span>发展历史</span>
+      </button>
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('ritual-window'); closeStartMenu()">
+        <i class="fa fa-magic w-6 text-green-400 mr-3"></i>
+        <span>仪式实践</span>
+      </button>
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('message-window'); closeStartMenu()">
+        <i class="fa fa-comments w-6 text-red-400 mr-3"></i>
+        <span>教徒留言</span>
+      </button>
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('profile-window'); closeStartMenu()">
+        <i class="fa fa-user w-6 text-yellow-400 mr-3"></i>
+        <span>个人中心</span>
+      </button>
+      <button class="w-full flex items-center px-4 py-3 text-left hover:bg-gray-800 transition-colors" onclick="openWindow('settings-window'); closeStartMenu()">
+        <i class="fa fa-cog w-6 text-gray-400 mr-3"></i>
+        <span>系统设置</span>
+      </button>
+    </div>
+    <div class="p-3 border-t border-gray-800">
+      <button class="w-full flex items-center justify-between px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded transition-colors" onclick="showLogin(); closeStartMenu()">
+        <span>登出系统</span>
+        <i class="fa fa-sign-out text-gray-400"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 底部任务栏 -->
+  <div class="h-12 bg-gray-900 border-t border-gray-800 flex items-center px-4 fixed bottom-0 left-0 right-0 z-50">
+    <!-- 开始按钮 -->
+    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-xl mr-4 cursor-pointer hover:bg-primary/80 transition-colors shadow-md" onclick="toggleStartMenu()">
+      <i class="fa fa-paw transform rotate-12"></i>
+    </div>
+
+    <!-- 窗口任务（动态添加） -->
+    <div id="taskbar-items" class="flex space-x-2">
+      <!-- 打开的窗口会在这里添加任务图标 -->
+    </div>
+
+    <!-- 右侧快捷按钮 -->
+    <div class="ml-auto flex items-center space-x-3">
+      <button class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors" title="音量" onclick="showToast('音量控制功能')">
+        <i class="fa fa-volume-up text-xs"></i>
+      </button>
+      <button class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition-colors" title="网络" onclick="showToast('网络状态良好')">
+        <i class="fa fa-wifi text-xs"></i>
+      </button>
+      <span id="current-time" class="text-sm mr-2"></span>
+      <div id="user-status" class="flex items-center space-x-2">
+        <i class="fa fa-circle text-gray-500 text-xs"></i>
+        <span class="text-sm">未登录</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 登录窗口 -->
+  <div id="login-window" class="fixed w-full max-w-md hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+    <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-user-circle text-primary"></i>
+        <span>用户登录</span>
+      </div>
+      <div class="window-no-drag flex space-x-2">
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('login-window')">
+          <i class="fa fa-minus text-xs"></i>
+        </button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('login-window')">
+          <i class="fa fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex justify-center mb-4">
+        <div class="w-16 h-16 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-3xl shadow-lg">
+          <i class="fa fa-paw transform rotate-12"></i>
+        </div>
+      </div>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm text-gray-300 mb-1">用户名</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <i class="fa fa-user"></i>
+            </span>
+            <input type="text" id="login-username" class="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 pl-10 text-white focus:outline-none focus:border-primary" placeholder="输入预设用户名（如user1~user100）" required>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <label class="flex items-center text-sm text-gray-300">
+            <input type="checkbox" id="remember-login" class="mr-2 text-primary"> 记住登录状态
+          </label>
+          <span class="text-xs text-gray-400">合法用户：user1~user100</span>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary py-2 rounded text-white hover:opacity-90 transition-opacity shadow-md flex items-center justify-center">
+          <i class="fa fa-sign-in mr-2"></i> 登录
+        </button>
+      </form>
+      <div class="mt-4 text-center text-xs text-gray-500">
+        飞天神猪教 © 2025 版权所有
+      </div>
+    </div>
+  </div>
+
+  <!-- 教义窗口 -->
+  <div id="doctrine-window" class="fixed w-full max-w-3xl hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+    <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-book text-blue-400"></i>
+        <span>神圣教义</span>
+      </div>
+      <div class="window-no-drag flex space-x-2">
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('doctrine-window')">
+          <i class="fa fa-minus text-xs"></i>
+        </button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('doctrine-window')">
+          <i class="fa fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 max-h-[60vh] overflow-y-auto">
+      <div class="flex items-center mb-6">
+        <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl mr-4">
+          <i class="fa fa-book"></i>
+        </div>
+        <h3 class="text-xl font-bold text-blue-400">飞天神猪教五大教义</h3>
+      </div>
+      
+      <div class="space-y-6 text-gray-300">
+        <div class="p-5 bg-gray-800 rounded-lg border border-blue-900/30 shadow-inner">
+          <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold mr-3 mt-1 flex-shrink-0">1</div>
+            <div>
+              <h4 class="font-semibold text-white mb-2 flex items-center">
+                万物一体
+                <span class="ml-2 text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">核心教义</span>
+              </h4>
+              <p>宇宙万物皆由飞天神猪的能量所创造，彼此相连，形成一个有机整体。伤害他人或自然，便是伤害自己。</p>
+              <div class="quote-style">
+                "天地与我并生，而万物与我为一" —— 《神猪经·第一章》
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-5 bg-gray-800 rounded-lg border border-blue-900/30 shadow-inner">
+          <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold mr-3 mt-1 flex-shrink-0">2</div>
+            <div>
+              <h4 class="font-semibold text-white mb-2 flex items-center">
+                智慧之道
+                <span class="ml-2 text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">修行指南</span>
+              </h4>
+              <p>追求知识与自我反省是接近神猪智慧的途径。我们应保持好奇心，不断学习，同时反思自身行为。</p>
+              <div class="quote-style">
+                "吾日三省吾身，方能见神猪真容" —— 《神猪经·第三章》
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-5 bg-gray-800 rounded-lg border border-blue-900/30 shadow-inner">
+          <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold mr-3 mt-1 flex-shrink-0">3</div>
+            <div>
+              <h4 class="font-semibold text-white mb-2 flex items-center">
+                感恩与分享
+                <span class="ml-2 text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">行为准则</span>
+              </h4>
+              <p>对所拥有的一切心怀感恩，乐于分享自己的资源与快乐，这是获得真正富足的途径。</p>
+              <div class="quote-style">
+                "施人玫瑰，手有余香；分享快乐，幸福倍增" —— 《神猪经·第五章》
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-5 bg-gray-800 rounded-lg border border-blue-900/30 shadow-inner">
+          <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold mr-3 mt-1 flex-shrink-0">4</div>
+            <div>
+              <h4 class="font-semibold text-white mb-2 flex items-center">
+                内心平和
+                <span class="ml-2 text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">心灵修炼</span>
+              </h4>
+              <p>通过冥想与正念，培养内心的平静。在喧嚣的世界中保持镇定，是神猪对信徒的教导。</p>
+              <div class="quote-style">
+                "心不动则万物不动，心清净则万物清净" —— 《神猪经·第七章》
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="p-5 bg-gray-800 rounded-lg border border-blue-900/30 shadow-inner">
+          <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold mr-3 mt-1 flex-shrink-0">5</div>
+            <div>
+              <h4 class="font-semibold text-white mb-2 flex items-center">
+                慈悲为怀
+                <span class="ml-2 text-xs bg-blue-900/50 px-2 py-0.5 rounded-full">道德规范</span>
+              </h4>
+              <p>以慈悲之心对待所有生命，包括自己。理解他人的痛苦，尽力帮助需要帮助的人，践行神猪的慈爱精神。</p>
+              <div class="quote-style">
+                "慈悲为怀，福泽绵长；善念永存，神猪庇佑" —— 《神猪经·第九章》
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置窗口 -->
+  <div id="settings-window" class="fixed w-full max-w-md hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+    <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-cog text-gray-400"></i>
+        <span>系统设置</span>
+      </div>
+      <div class="window-no-drag flex space-x-2">
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('settings-window')">
+          <i class="fa fa-minus text-xs"></i>
+        </button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('settings-window')">
+          <i class="fa fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6">
+      <h3 class="text-lg font-bold text-white mb-6 flex items-center">
+        <i class="fa fa-sliders text-gray-400 mr-2"></i> 桌面设置
+      </h3>
+      
+      <div class="space-y-6">
+        <div>
+          <h4 class="font-semibold text-white mb-3">界面主题</h4>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="h-12 rounded-lg bg-gradient-to-r from-primary to-secondary flex items-center justify-center border-2 border-white shadow-lg" onclick="changeTheme('default')">
+              <span class="w-4 h-4 rounded-full bg-white"></span>
+            </button>
+            <button class="h-12 rounded-lg bg-gradient-to-r from-blue-900 to-purple-900 flex items-center justify-center hover:border-2 hover:border-gray-500 transition-colors" onclick="changeTheme('blue')">
+              <span class="w-4 h-4 rounded-full bg-gray-300"></span>
+            </button>
+            <button class="h-12 rounded-lg bg-gradient-to-r from-gray-800 to-black flex items-center justify-center hover:border-2 hover:border-gray-500 transition-colors" onclick="changeTheme('dark')">
+              <span class="w-4 h-4 rounded-full bg-gray-600"></span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="p-4 bg-gray-800 rounded-lg">
+          <h4 class="font-semibold text-white mb-3">桌面设置</h4>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-300">显示桌面小组件</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer" id="show-widgets" onchange="toggleWidgets()">
+                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-300">显示背景水印</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked class="sr-only peer" id="show-watermark" onchange="toggleWatermark()">
+                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <button class="w-full bg-gray-800 hover:bg-gray-700 transition-colors py-2 rounded text-white flex items-center justify-center" onclick="resetSettings()">
+          <i class="fa fa-refresh mr-2"></i> 恢复默认设置
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 个人中心窗口 -->
+  <div id="profile-window" class="fixed w-full max-w-2xl hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+    <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-user-circle text-primary"></i>
+        <span>个人中心</span>
+      </div>
+      <div class="window-no-drag flex space-x-2">
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('profile-window')">
+          <i class="fa fa-minus text-xs"></i>
+        </button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('profile-window')">
+          <i class="fa fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 max-h-[60vh] overflow-y-auto">
+      <!-- 用户信息卡片 -->
+      <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+          <i class="fa fa-id-card text-primary mr-2"></i> 个人信息
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">用户名</label>
+              <div id="profile-center-username" class="text-white font-medium"></div>
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">用户ID</label>
+              <div id="profile-id" class="text-white font-medium"></div>
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">加入日期</label>
+              <div id="profile-join-date" class="text-white font-medium"></div>
+            </div>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">昵称</label>
+              <input type="text" id="profile-nickname" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white focus:outline-none focus:border-primary" placeholder="设置昵称">
+            </div>
+            <div>
+              <label class="block text-gray-400 text-sm mb-1">个人签名</label>
+              <textarea id="profile-signature" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white focus:outline-none focus:border-primary" rows="2" placeholder="设置个人签名"></textarea>
+            </div>
+            <div class="pt-2">
+              <button class="bg-primary hover:bg-primary/80 transition-colors py-2 px-4 rounded text-white flex items-center" onclick="saveProfile()">
+                <i class="fa fa-save mr-2"></i> 保存信息
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 仪表盘部分 -->
+      <div class="bg-gray-800 rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+          <i class="fa fa-dashboard text-primary mr-2"></i> 个人仪表盘
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">仪式参与次数</div>
+            <div class="text-white text-2xl font-bold mt-2">
+              <span id="ritual-count">0</span>
+            </div>
+            <div class="flex justify-between items-center mt-3">
+              <span class="text-xs text-gray-400">本周</span>
+              <span class="text-xs text-green-400"><i class="fa fa-arrow-up"></i> 12%</span>
+            </div>
+          </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">教义学习时长</div>
+            <div class="text-white text-2xl font-bold mt-2">
+              <span id="study-hours">0</span>h
+            </div>
+            <div class="flex justify-between items-center mt-3">
+              <span class="text-xs text-gray-400">本月</span>
+              <span class="text-xs text-green-400"><i class="fa fa-arrow-up"></i> 8%</span>
+            </div>
+          </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <div class="text-gray-400 text-sm">贡献值</div>
+            <div class="text-white text-2xl font-bold mt-2">
+              <span id="contribution-points">0</span>
+            </div>
+            <div class="flex justify-between items-center mt-3">
+              <span class="text-xs text-gray-400">总积分</span>
+              <span class="text-xs text-blue-400">等级: <span id="user-level">1</span></span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 图表容器 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-gray-700 rounded-lg p-4">
+            <h4 class="text-white text-sm font-medium mb-3">每周活动统计</h4>
+            <canvas id="activity-chart" height="200"></canvas>
+          </div>
+          <div class="bg-gray-700 rounded-lg p-4">
+            <h4 class="text-white text-sm font-medium mb-3">教义学习进度</h4>
+            <canvas id="progress-chart" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 任务管理部分 -->
+      <div class="bg-gray-800 rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-white flex items-center">
+            <i class="fa fa-tasks text-primary mr-2"></i> 任务管理
+          </h3>
+          <button class="bg-primary/20 hover:bg-primary/30 transition-colors py-1 px-3 rounded text-primary text-sm flex items-center" onclick="addTask()">
+            <i class="fa fa-plus mr-1"></i> 添加任务
+          </button>
+        </div>
+        
+        <div class="space-y-3">
+          <div id="tasks-container" class="space-y-2">
+            <!-- 任务将通过JavaScript动态添加 -->
+            <div class="text-gray-400 text-center py-4" id="no-tasks-message">暂无任务，点击上方按钮添加</div>
+          </div>
+          
+          <!-- 任务统计和操作 -->
+          <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
+            <div class="text-sm text-gray-400" id="tasks-summary">完成 0/0 任务</div>
+            <button class="text-xs text-gray-400 hover:text-red-400 transition-colors" onclick="clearCompletedTasks()">
+              <i class="fa fa-trash mr-1"></i> 清除已完成任务
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 帮助中心窗口 -->
+  <div id="help-window" class="fixed w-full max-w-md hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+    <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fa fa-question-circle text-blue-400"></i>
+        <span>帮助中心</span>
+      </div>
+      <div class="window-no-drag flex space-x-2">
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('help-window')">
+          <i class="fa fa-minus text-xs"></i>
+        </button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('help-window')">
+          <i class="fa fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+    <div class="p-6 max-h-[60vh] overflow-y-auto">
+      <h3 class="text-lg font-bold text-white mb-6 flex items-center">
+        <i class="fa fa-life-ring text-blue-400 mr-2"></i> 常见问题
+      </h3>
+      
+      <div class="space-y-4">
+        <div class="p-4 bg-gray-800 rounded-lg">
+          <button class="flex items-center justify-between w-full text-left" onclick="toggleFaq('faq1')">
+            <span class="font-semibold text-white">如何登录系统？</span>
+            <i id="faq1-icon" class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+          </button>
+          <div id="faq1" class="hidden mt-3 text-gray-300 text-sm">
+            <p>系统预设了100个合法用户名（user1~user100），您可以输入任意一个用户名进行登录，无需密码。登录后会记住您的登录状态，下次访问无需重新登录。</p>
+          </div>
+        </div>
+        
+        <div class="p-4 bg-gray-800 rounded-lg">
+          <button class="flex items-center justify-between w-full text-left" onclick="toggleFaq('faq2')">
+            <span class="font-semibold text-white">如何参与仪式实践？</span>
+            <i id="faq2-icon" class="fa fa-chevron-down text-gray-400 transition-transform"></i>
+          </button>
+          <div id="faq2" class="hidden mt-3 text-gray-300 text-sm">
+            <p>点击桌面"仪式实践"图标，查看各类仪式的详细流程和时间安排。您可以根据自身情况选择适合的仪式参与，无需报名，按时进行即可。登录后会记录您的参与情况。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript 交互逻辑 -->
+  <script>
+    // 全局变量
+    let currentUser = null;
+    let openWindows = new Set();
+    
+    // 初始化系统
+    function initSystem() {
+      // 更新日期和时间
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      
+      // 检查登录状态
+      checkLoginStatus();
+      
+      // 绑定登录表单提交事件
+      document.getElementById('login-form')?.addEventListener('submit', handleLogin);
+    }
+    
+    // 开始菜单相关函数
+    function toggleStartMenu() {
+      const startMenu = document.getElementById('start-menu');
+      startMenu.classList.toggle('hidden');
+      
+      // 如果菜单打开，添加点击外部关闭的监听
+      if (!startMenu.classList.contains('hidden')) {
+        setTimeout(() => {
+          document.addEventListener('click', handleOutsideClick);
+        }, 0);
+      }
+    }
+    
+    function closeStartMenu() {
+      const startMenu = document.getElementById('start-menu');
+      if (startMenu) {
+        startMenu.classList.add('hidden');
+        document.removeEventListener('click', handleOutsideClick);
+      }
+    }
+    
+    function handleOutsideClick(event) {
+      const startMenu = document.getElementById('start-menu');
+      const startButton = event.target.closest('[onclick="toggleStartMenu()"]');
+      
+      if (startMenu && !startMenu.contains(event.target) && !startButton) {
+        closeStartMenu();
+      }
+    }
+    
+    // 更新日期和时间
+    function updateDateTime() {
+      const now = new Date();
+      
+      // 更新任务栏时间
+      const timeElement = document.getElementById('current-time');
+      if (timeElement) {
+        timeElement.textContent = now.toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
+      
+      // 更新日历组件
+      const dateElement = document.getElementById('widget-date');
+      const weekdayElement = document.getElementById('widget-weekday');
+      if (dateElement && weekdayElement) {
+        dateElement.textContent = now.getDate();
+        weekdayElement.textContent = '星期' + '日一二三四五六'.charAt(now.getDay());
+      }
+    }
+    
+    // 检查登录状态
+    function checkLoginStatus() {
+      // 首先尝试获取当前登录的用户名
+      const loggedInUsername = localStorage.getItem('currentLoggedInUser');
+      if (loggedInUsername) {
+        // 然后获取该用户的详细数据
+        const savedUserData = localStorage.getItem(`feitianUser_${loggedInUsername}`);
+        if (savedUserData) {
+          currentUser = JSON.parse(savedUserData);
+          updateUserStatus();
+          console.log(`已自动登录用户: ${loggedInUsername}`);
+        }
+      }
+      // 兼容旧的数据存储方式
+      else if (localStorage.getItem('feitianUser')) {
+        const legacyUser = JSON.parse(localStorage.getItem('feitianUser'));
+        currentUser = legacyUser;
+        // 将旧数据迁移到新的存储方式
+        localStorage.setItem(`feitianUser_${legacyUser.username}`, localStorage.getItem('feitianUser'));
+        localStorage.setItem('currentLoggedInUser', legacyUser.username);
+        localStorage.removeItem('feitianUser'); // 清除旧数据
+        updateUserStatus();
+      }
+    }
+    
+    // 处理登录
+    function handleLogin(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('login-username');
+      const rememberCheckbox = document.getElementById('remember-login');
+      
+      if (usernameInput) {
+        const username = usernameInput.value.trim();
+        
+        // 简单验证：用户名格式为user1~user100
+        if (/^user(?:[1-9]|[1-9]\d|100)$/.test(username)) {
+          // 检查是否已有该用户的数据
+          const savedUserData = localStorage.getItem(`feitianUser_${username}`);
+          
+          if (savedUserData) {
+            // 使用已保存的数据
+            currentUser = JSON.parse(savedUserData);
+          } else {
+            // 创建新用户数据
+            currentUser = {
+              username: username,
+              id: 'SZ-2025-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+              joinDate: new Date().toLocaleDateString('zh-CN')
+            };
+          }
+          
+          // 保存用户数据（无论是否勾选记住我）
+          localStorage.setItem(`feitianUser_${username}`, JSON.stringify(currentUser));
+          
+          if (rememberCheckbox && rememberCheckbox.checked) {
+            // 记录当前登录的用户
+            localStorage.setItem('currentLoggedInUser', username);
+          }
+          
+          updateUserStatus();
+          closeWindow('login-window');
+          showToast(`欢迎回来，${username}！`);
+        } else {
+          showToast('请输入有效的用户名（user1~user100）');
+        }
+      }
+    }
+    
+    // 更新用户状态
+    function updateUserStatus() {
+      const userStatusElement = document.getElementById('user-status');
+      const profileIconElement = document.getElementById('profile-icon');
+      const profileUsernameElement = document.getElementById('profile-username');
+      const profileCenterUsernameElement = document.getElementById('profile-center-username');
+      const profileIdElement = document.getElementById('profile-id');
+      const profileJoinDateElement = document.getElementById('profile-join-date');
+      
+      if (currentUser) {
+        // 更新用户状态显示
+        if (userStatusElement) {
+          userStatusElement.innerHTML = `
+            <i class="fa fa-circle text-green-500 text-xs"></i>
+            <span class="text-sm">${currentUser.username}</span>
+          `;
+        }
+        
+        // 显示个人中心图标
+        if (profileIconElement) {
+          profileIconElement.classList.remove('hidden');
+        }
+        
+        // 更新个人中心用户名
+        if (profileUsernameElement) {
+          profileUsernameElement.textContent = currentUser.username;
+        }
+        
+        if (profileCenterUsernameElement) {
+          profileCenterUsernameElement.textContent = currentUser.username;
+        }
+        
+        if (profileIdElement) {
+          profileIdElement.textContent = currentUser.id;
+        }
+        
+        if (profileJoinDateElement) {
+          profileJoinDateElement.textContent = currentUser.joinDate;
+        }
+      } else {
+        // 重置用户状态显示
+        if (userStatusElement) {
+          userStatusElement.innerHTML = `
+            <i class="fa fa-circle text-gray-500 text-xs"></i>
+            <span class="text-sm">未登录</span>
+          `;
+        }
+        
+        // 隐藏个人中心图标
+        if (profileIconElement) {
+          profileIconElement.classList.add('hidden');
+        }
+      }
+    }
+    
+    // 退出登录
+    function logout() {
+      localStorage.removeItem('currentLoggedInUser');
+      currentUser = null;
+      updateUserStatus();
+      closeWindow('profile-window');
+      showToast('已退出登录');
+    }
+    
+    // 打开窗口
+    function openWindow(windowId) {
+      const windowElement = document.getElementById(windowId);
+      if (windowElement) {
+        // 如果窗口已打开，先关闭它
+        if (!windowElement.classList.contains('hidden')) {
+          closeWindow(windowId);
+          return;
+        }
+        
+        // 显示窗口
+        windowElement.classList.remove('hidden');
+        openWindows.add(windowId);
+        
+        // 添加到任务栏
+        addTaskBarItem(windowId);
+        
+        // 设置为活动窗口（提高z-index）
+        setActiveWindow(windowId);
+      }
+    }
+    
+    // 最小化窗口
+    function minimizeWindow(windowId) {
+      const windowElement = document.getElementById(windowId);
+      if (windowElement) {
+        windowElement.classList.add('hidden');
+      }
+    }
+    
+    // 关闭窗口
+    function closeWindow(windowId) {
+      const windowElement = document.getElementById(windowId);
+      if (windowElement) {
+        windowElement.classList.add('hidden');
+        openWindows.delete(windowId);
+        removeTaskBarItem(windowId);
+      }
+    }
+    
+    // 设置活动窗口
+    function setActiveWindow(windowId) {
+      // 重置所有窗口的z-index
+      const allWindows = document.querySelectorAll('[id$="-window"]');
+      allWindows.forEach(win => {
+        win.style.zIndex = '40';
+      });
+      
+      // 设置当前窗口为最高z-index
+      const activeWindow = document.getElementById(windowId);
+      if (activeWindow) {
+        activeWindow.style.zIndex = '50';
+      }
+      
+      // 更新任务栏活动状态
+      updateTaskBarActive(windowId);
+    }
+    
+    // 添加任务栏项目
+    function addTaskBarItem(windowId) {
+      const taskbarItemsElement = document.getElementById('taskbar-items');
+      if (taskbarItemsElement) {
+        // 检查是否已存在
+        if (!document.getElementById(`task-${windowId}`)) {
+          let iconClass = 'fa-file';
+          let title = '窗口';
+          
+          // 根据窗口类型设置图标和标题
+          if (windowId.includes('login')) { iconClass = 'fa-user-circle'; title = '登录'; }
+          else if (windowId.includes('doctrine')) { iconClass = 'fa-book'; title = '神圣教义'; }
+          else if (windowId.includes('profile')) { iconClass = 'fa-user-circle'; title = '个人中心'; }
+          else if (windowId.includes('settings')) { iconClass = 'fa-cog'; title = '系统设置'; }
+          else if (windowId.includes('help')) { iconClass = 'fa-question-circle'; title = '帮助中心'; }
+          
+          const taskItem = document.createElement('div');
+          taskItem.id = `task-${windowId}`;
+          taskItem.className = 'taskbar-item taskbar-item-active';
+          taskItem.title = title;
+          taskItem.innerHTML = `<i class="fa ${iconClass}"></i>`;
+          taskItem.onclick = () => {
+            const windowElement = document.getElementById(windowId);
+            if (windowElement.classList.contains('hidden')) {
+              windowElement.classList.remove('hidden');
+            }
+            setActiveWindow(windowId);
+          };
+          
+          taskbarItemsElement.appendChild(taskItem);
+        }
+      }
+    }
+    
+    // 移除任务栏项目
+    function removeTaskBarItem(windowId) {
+      const taskItem = document.getElementById(`task-${windowId}`);
+      if (taskItem && taskItem.parentElement) {
+        taskItem.parentElement.removeChild(taskItem);
+      }
+    }
+    
+    // 更新任务栏活动状态
+    function updateTaskBarActive(windowId) {
+      const taskItems = document.querySelectorAll('.taskbar-item');
+      taskItems.forEach(item => {
+        item.classList.remove('taskbar-item-active');
+      });
+      
+      const activeTaskItem = document.getElementById(`task-${windowId}`);
+      if (activeTaskItem) {
+        activeTaskItem.classList.add('taskbar-item-active');
+      }
+    }
+    
+    // 显示提示消息
+    function showToast(message) {
+      // 移除已存在的toast
+      const existingToast = document.querySelector('.toast');
+      if (existingToast) {
+        existingToast.remove();
+      }
+      
+      // 创建新的toast
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      
+      // 3秒后自动消失
+      setTimeout(() => {
+        toast.classList.remove('animate-toast-in');
+        toast.classList.add('animate-toast-out');
+        setTimeout(() => {
+          if (toast.parentElement) {
+            toast.parentElement.removeChild(toast);
+          }
+        }, 300);
+      }, 3000);
+    }
+    
+    // 切换FAQ展开/收起
+    function toggleFaq(faqId) {
+      const faqContent = document.getElementById(faqId);
+      const faqIcon = document.getElementById(`${faqId}-icon`);
+      
+      if (faqContent && faqIcon) {
+        faqContent.classList.toggle('hidden');
+        faqIcon.classList.toggle('rotate-180');
+      }
+    }
+    
+    // 切换主题
+    function changeTheme(themeName) {
+      const body = document.body;
+      
+      // 移除所有主题类
+      body.classList.remove('theme-blue', 'theme-dark');
+      
+      // 添加选中的主题类
+      if (themeName !== 'default') {
+        body.classList.add(`theme-${themeName}`);
+      }
+      
+      showToast(`主题已切换为${themeName === 'default' ? '默认主题' : themeName === 'blue' ? '蓝色主题' : '深色主题'}`);
+    }
+    
+    // 切换小组件显示
+    function toggleWidgets() {
+      const widgetsElement = document.getElementById('desktop-widgets');
+      const checkbox = document.getElementById('show-widgets');
+      
+      if (widgetsElement && checkbox) {
+        if (checkbox.checked) {
+          widgetsElement.classList.remove('hidden');
+        } else {
+          widgetsElement.classList.add('hidden');
+        }
+      }
+    }
+    
+    // 切换水印显示
+    function toggleWatermark() {
+      const watermarkElement = document.getElementById('background-watermark');
+      const checkbox = document.getElementById('show-watermark');
+      
+      if (watermarkElement && checkbox) {
+        if (checkbox.checked) {
+          watermarkElement.classList.remove('hidden');
+        } else {
+          watermarkElement.classList.add('hidden');
+        }
+      }
+    }
+    
+    // 保存个人资料
+    function saveProfile() {
+      if (!currentUser) {
+        showToast('请先登录');
+        return;
+      }
+      
+      const nickname = document.getElementById('profile-nickname').value.trim();
+      const signature = document.getElementById('profile-signature').value.trim();
+      
+      // 更新用户信息
+      currentUser.nickname = nickname || currentUser.username;
+      currentUser.signature = signature;
+      
+      // 更新UI显示
+      document.getElementById('profile-center-username').textContent = currentUser.username;
+      document.getElementById('profile-id').textContent = currentUser.id || `UID:${Math.floor(Math.random() * 10000)}`;
+      document.getElementById('profile-join-date').textContent = currentUser.joinDate || new Date().toLocaleDateString();
+      document.getElementById('profile-username').textContent = currentUser.nickname || currentUser.username;
+      
+      // 保存到localStorage
+      localStorage.setItem('feitianUser', JSON.stringify(currentUser));
+      
+      showToast('个人资料已保存');
+    }
+    
+    // 加载个人资料
+    function loadProfile() {
+      if (!currentUser) return;
+      
+      // 初始化用户信息（如果不存在）
+      if (!currentUser.id) currentUser.id = `UID:${Math.floor(Math.random() * 10000)}`;
+      if (!currentUser.joinDate) currentUser.joinDate = new Date().toLocaleDateString();
+      
+      // 更新个人信息UI
+      document.getElementById('profile-center-username').textContent = currentUser.username;
+      document.getElementById('profile-id').textContent = currentUser.id;
+      document.getElementById('profile-join-date').textContent = currentUser.joinDate;
+      document.getElementById('profile-nickname').value = currentUser.nickname || '';
+      document.getElementById('profile-signature').value = currentUser.signature || '';
+      document.getElementById('profile-username').textContent = currentUser.nickname || currentUser.username;
+      
+      // 加载仪表盘数据
+      loadDashboardData();
+      
+      // 加载任务列表
+      loadTasks();
+    }
+    
+    // 加载仪表盘数据
+      function loadDashboardData() {
+        // 为特定用户加载数据，确保数据隔离
+        const userKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+        const savedData = localStorage.getItem(userKey);
+        let data;
+        
+        if (savedData) {
+          data = JSON.parse(savedData);
+        } else {
+          // 生成随机数据
+          data = {
+            ritualCount: Math.floor(Math.random() * 50) + 10,
+            studyHours: Math.floor(Math.random() * 20) + 5,
+            contributionPoints: Math.floor(Math.random() * 1000) + 100,
+            userLevel: Math.floor(Math.random() * 5) + 1
+          };
+          localStorage.setItem(userKey, JSON.stringify(data));
+        }
+        
+        // 更新UI
+        document.getElementById('ritual-count').textContent = data.ritualCount;
+        document.getElementById('study-hours').textContent = data.studyHours;
+        document.getElementById('contribution-points').textContent = data.contributionPoints;
+        document.getElementById('user-level').textContent = data.userLevel;
+        
+        // 初始化图表
+        initCharts();
+        
+        // 添加数据编辑按钮事件
+        addDashboardEditEvents();
+      }
+      
+      // 添加仪表盘数据编辑事件
+      function addDashboardEditEvents() {
+        // 添加编辑按钮点击事件
+        const counters = ['ritual-count', 'study-hours', 'contribution-points'];
+        counters.forEach(id => {
+          const element = document.getElementById(id);
+          if (element && !element.dataset.editable) {
+            element.dataset.editable = 'true';
+            element.style.cursor = 'pointer';
+            element.style.userSelect = 'none';
+            
+            // 添加悬停效果
+            element.parentElement.classList.add('hover:bg-gray-600', 'transition-colors');
+            
+            element.addEventListener('click', function() {
+              const currentValue = parseInt(this.textContent);
+              const title = id === 'ritual-count' ? '仪式参与次数' : 
+                           id === 'study-hours' ? '教义学习时长(小时)' : '贡献值';
+              const newValue = prompt(`请输入新的${title}:`, currentValue);
+              
+              if (newValue !== null && !isNaN(parseInt(newValue)) && parseInt(newValue) >= 0) {
+                this.textContent = parseInt(newValue);
+                if (id === 'study-hours') {
+                  this.textContent += 'h';
+                }
+                updateDashboardData(id, parseInt(newValue));
+                showToast(`${title}已更新`);
+              }
+            });
+          }
+        });
+        
+        // 添加学习目标编辑功能
+        const progressChart = document.getElementById('progress-chart');
+        if (progressChart && !progressChart.dataset.goalEditable) {
+          progressChart.dataset.goalEditable = 'true';
+          const chartContainer = progressChart.closest('.bg-gray-700');
+          
+          // 添加编辑目标按钮
+          const goalButton = document.createElement('button');
+          goalButton.className = 'absolute bottom-2 right-2 px-3 py-1 text-xs bg-primary/80 hover:bg-primary rounded-full text-white transition-colors';
+          goalButton.textContent = '编辑目标';
+          goalButton.onclick = function() {
+            // 获取当前保存的目标或默认值
+            const userKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+            const savedData = localStorage.getItem(userKey);
+            const userData = savedData ? JSON.parse(savedData) : {};
+            const currentGoal = userData.studyGoal || 50;
+            
+            const newGoal = prompt('请输入新的学习目标时长(小时):', currentGoal);
+            if (newGoal !== null && !isNaN(parseInt(newGoal)) && parseInt(newGoal) > 0) {
+              // 更新图表需要重新初始化
+              updateDashboardGoal(parseInt(newGoal));
+              showToast('学习目标已更新');
+            }
+          };
+          
+          chartContainer.style.position = 'relative';
+          chartContainer.appendChild(goalButton);
+        }
+      }
+      
+      // 更新仪表盘学习目标
+      function updateDashboardGoal(newGoal) {
+        const userKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+        const savedData = localStorage.getItem(userKey);
+        let data = savedData ? JSON.parse(savedData) : {};
+        
+        // 保存目标到用户数据
+        data.studyGoal = newGoal;
+        localStorage.setItem(userKey, JSON.stringify(data));
+        
+        // 重新初始化图表
+        if (window.progressChart) {
+          window.progressChart.destroy();
+        }
+        initCharts();
+      }
+      
+      // 更新仪表盘数据
+      function updateDashboardData(field, value) {
+        const userKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+        const savedData = localStorage.getItem(userKey);
+        let data = savedData ? JSON.parse(savedData) : {};
+        
+        // 根据字段更新相应的值
+        switch(field) {
+          case 'ritual-count':
+            data.ritualCount = value;
+            break;
+          case 'study-hours':
+            data.studyHours = value;
+            break;
+          case 'contribution-points':
+            data.contributionPoints = value;
+            // 根据贡献值更新用户等级
+            data.userLevel = Math.floor(value / 200) + 1;
+            document.getElementById('user-level').textContent = data.userLevel;
+            break;
+        }
+        
+        localStorage.setItem(userKey, JSON.stringify(data));
+        
+        // 重新初始化图表以反映新数据
+        if (window.activityChart) {
+          window.activityChart.destroy();
+        }
+        if (window.progressChart) {
+          window.progressChart.destroy();
+        }
+        initCharts();
+      }
+    
+    // 初始化图表
+      function initCharts() {
+        // 获取用户特定的数据
+        const userKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+        const savedData = localStorage.getItem(userKey);
+        const userData = savedData ? JSON.parse(savedData) : {};
+        
+        // 基于用户数据生成更相关的图表数据
+        const avgDailyActivities = Math.floor((userData.ritualCount || 20) / 7);
+        // 生成有随机性但基于平均值的一周活动数据
+        const weeklyData = Array(7).fill().map(() => Math.floor(avgDailyActivities * (0.7 + Math.random() * 0.6)));
+        
+        // 每周活动图表
+        const activityCtx = document.getElementById('activity-chart').getContext('2d');
+        window.activityChart = new Chart(activityCtx, {
+          type: 'bar',
+          data: {
+            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+            datasets: [{
+              label: '活动次数',
+              data: weeklyData,
+              backgroundColor: 'rgba(138, 43, 226, 0.6)',
+              borderColor: 'rgba(138, 43, 226, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                ticks: {
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                backgroundColor: 'rgba(42, 22, 65, 0.9)',
+                titleColor: 'white',
+                bodyColor: 'rgba(255, 255, 255, 0.7)',
+                callbacks: {
+                  label: function(context) {
+                    return `活动次数: ${context.parsed.y}`;
+                  }
+                }
+              }
+            },
+            // 点击柱子时的交互
+            onClick: function(evt, elements) {
+              if (elements.length > 0) {
+                const index = elements[0].index;
+                const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                const newValue = prompt(`请输入${dayNames[index]}的活动次数:`, weeklyData[index]);
+                
+                if (newValue !== null && !isNaN(parseInt(newValue)) && parseInt(newValue) >= 0) {
+                  weeklyData[index] = parseInt(newValue);
+                  window.activityChart.data.datasets[0].data = weeklyData;
+                  window.activityChart.update();
+                  showToast(`${dayNames[index]}活动次数已更新`);
+                }
+              }
+            }
+          }
+        });
+        
+        // 学习进度图表
+        const progressCtx = document.getElementById('progress-chart').getContext('2d');
+        // 基于学习时长计算进度百分比
+        const totalHoursGoal = userData.studyGoal || 50; // 使用保存的目标或默认50小时
+        const progressPercentage = Math.min(100, Math.floor(((userData.studyHours || 10) / totalHoursGoal) * 100));
+        
+        window.progressChart = new Chart(progressCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['已完成', '未完成'],
+            datasets: [{
+              data: [progressPercentage, 100 - progressPercentage],
+              backgroundColor: [
+                'rgba(138, 43, 226, 0.6)',
+                'rgba(255, 255, 255, 0.1)'
+              ],
+              borderColor: [
+                'rgba(138, 43, 226, 1)',
+                'rgba(255, 255, 255, 0.2)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  color: 'rgba(255, 255, 255, 0.7)'
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(42, 22, 65, 0.9)',
+                titleColor: 'white',
+                bodyColor: 'rgba(255, 255, 255, 0.7)',
+                callbacks: {
+                  label: function(context) {
+                    return `${context.label}: ${context.parsed}%`;
+                  }
+                }
+              },
+              // 添加中心文本显示进度
+              beforeDraw: function(chart) {
+                const width = chart.width;
+                const height = chart.height;
+                const ctx = chart.ctx;
+                ctx.restore();
+                const fontSize = (height / 114).toFixed(2);
+                ctx.font = fontSize + "em sans-serif";
+                ctx.textBaseline = "middle";
+                
+                const text = progressPercentage + "%";
+                const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                const textY = height / 2;
+                
+                ctx.fillStyle = 'white';
+                ctx.fillText(text, textX, textY);
+                ctx.save();
+              }
+            }
+          }
+        });
+      }
+    
+    // 添加任务
+      function addTask() {
+        const taskText = prompt('请输入任务内容:');
+        if (taskText && taskText.trim()) {
+          const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+          let tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+          
+          const newTask = {
+            id: Date.now(),
+            text: taskText.trim(),
+            completed: false,
+            createdAt: new Date().toISOString()
+          };
+          
+          tasks.push(newTask);
+          localStorage.setItem(userKey, JSON.stringify(tasks));
+          
+          renderTasks(tasks);
+          showToast('任务已添加');
+        }
+      }
+    
+    // 加载任务
+      function loadTasks() {
+        // 为特定用户加载任务，确保数据隔离
+        const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+        const tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+        renderTasks(tasks);
+      }
+    
+    // 渲染任务列表
+      function renderTasks(tasks) {
+        const container = document.getElementById('tasks-container');
+        container.innerHTML = '';
+        
+        if (tasks.length === 0) {
+          container.innerHTML = '<div class="text-gray-400 text-center py-4" id="no-tasks-message">暂无任务，点击上方按钮添加</div>';
+          // 更新任务统计
+          updateTasksSummary(0, 0);
+          return;
+        }
+        
+        // 计算完成的任务数量
+        const completedCount = tasks.filter(task => task.completed).length;
+        
+        // 更新任务统计
+        updateTasksSummary(completedCount, tasks.length);
+        
+        // 先显示未完成的任务，再显示已完成的任务
+        const incompleteTasks = tasks.filter(task => !task.completed);
+        const completedTasks = tasks.filter(task => task.completed);
+        
+        const allTasks = [...incompleteTasks, ...completedTasks];
+        
+        allTasks.forEach(task => {
+          const taskElement = document.createElement('div');
+          taskElement.className = `flex items-center justify-between p-3 rounded-lg ${task.completed ? 'bg-gray-700/50' : 'bg-gray-700'} transition-colors group`;
+          
+          // 格式化创建时间
+          const createdAt = new Date(task.createdAt);
+          const formattedDate = `${createdAt.getMonth() + 1}/${createdAt.getDate()} ${createdAt.getHours().toString().padStart(2, '0')}:${createdAt.getMinutes().toString().padStart(2, '0')}`;
+          
+          taskElement.innerHTML = `
+            <div class="flex items-center space-x-3 flex-grow">
+              <input type="checkbox" ${task.completed ? 'checked' : ''} class="w-4 h-4 text-primary rounded focus:ring-primary" onchange="toggleTaskStatus(${task.id})">
+              <div class="flex-grow">
+                <div class="text-gray-200 ${task.completed ? 'line-through text-gray-500' : ''}">${task.text}</div>
+                <div class="text-xs text-gray-500 mt-1">创建于: ${formattedDate}</div>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button class="text-gray-400 hover:text-blue-400 transition-colors" onclick="editTask(${task.id}, '${task.text.replace(/'/g, "\\'")}')"><i class="fa fa-pencil"></i></button>
+              <button class="text-gray-400 hover:text-red-400 transition-colors" onclick="deleteTask(${task.id})"><i class="fa fa-trash"></i></button>
+            </div>
+          `;
+          
+          // 双击任务文本也可以编辑
+          const taskTextElement = taskElement.querySelector('.text-gray-200');
+          taskTextElement.addEventListener('dblclick', function() {
+            editTask(task.id, task.text);
+          });
+          
+          container.appendChild(taskElement);
+        });
+      }
+      
+      // 编辑任务
+      function editTask(taskId, currentText) {
+        const newText = prompt('编辑任务内容:', currentText);
+        if (newText !== null && newText.trim()) {
+          const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+          let tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+          const task = tasks.find(t => t.id === taskId);
+          
+          if (task) {
+            task.text = newText.trim();
+            localStorage.setItem(userKey, JSON.stringify(tasks));
+            renderTasks(tasks);
+            showToast('任务已更新');
+          }
+        }
+      }
+      
+      // 更新任务统计
+      function updateTasksSummary(completedCount, totalCount) {
+        const summaryElement = document.getElementById('tasks-summary');
+        if (summaryElement) {
+          summaryElement.textContent = `完成 ${completedCount}/${totalCount} 任务`;
+        }
+      }
+      
+      // 清除已完成任务
+      function clearCompletedTasks() {
+        const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+        let tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+        const completedCount = tasks.filter(task => task.completed).length;
+        
+        if (completedCount === 0) {
+          showToast('没有已完成的任务');
+          return;
+        }
+        
+        if (confirm(`确定要清除所有已完成的任务吗？(共${completedCount}个)`)) {
+          tasks = tasks.filter(task => !task.completed);
+          localStorage.setItem(userKey, JSON.stringify(tasks));
+          renderTasks(tasks);
+          showToast('已清除所有已完成任务');
+        }
+      }
+    
+    // 切换任务状态
+      function toggleTaskStatus(taskId) {
+        const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+        let tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+        const task = tasks.find(t => t.id === taskId);
+        
+        if (task) {
+          task.completed = !task.completed;
+          localStorage.setItem(userKey, JSON.stringify(tasks));
+          renderTasks(tasks);
+          
+          // 更新贡献值
+          const dashboardUserKey = currentUser ? `dashboardData_${currentUser.username}` : 'dashboardData';
+          const savedData = localStorage.getItem(dashboardUserKey);
+          let dashboardData = savedData ? JSON.parse(savedData) : {
+            ritualCount: 0,
+            studyHours: 0,
+            contributionPoints: 0,
+            userLevel: 1
+          };
+          
+          // 完成任务增加贡献值
+          if (task.completed) {
+            dashboardData.contributionPoints += 10;
+            dashboardData.userLevel = Math.floor(dashboardData.contributionPoints / 200) + 1;
+            localStorage.setItem(dashboardUserKey, JSON.stringify(dashboardData));
+            
+            // 更新UI
+            document.getElementById('contribution-points').textContent = dashboardData.contributionPoints;
+            document.getElementById('user-level').textContent = dashboardData.userLevel;
+            
+            showToast('恭喜！完成任务获得10点贡献值');
+          }
+        }
+      }
+    
+    // 删除任务
+      function deleteTask(taskId) {
+        if (confirm('确定要删除这个任务吗？')) {
+          const userKey = currentUser ? `userTasks_${currentUser.username}` : 'userTasks';
+          let tasks = JSON.parse(localStorage.getItem(userKey) || '[]');
+          tasks = tasks.filter(t => t.id !== taskId);
+          localStorage.setItem(userKey, JSON.stringify(tasks));
+          renderTasks(tasks);
+          showToast('任务已删除');
+        }
+      }
+    
+    // 重写openWindow函数，添加个人中心窗口的特殊处理
+    const originalOpenWindow = openWindow;
+    openWindow = function(windowId) {
+      originalOpenWindow(windowId);
+      
+      // 如果打开的是个人中心窗口，加载个人资料
+      if (windowId === 'profile-window' && currentUser) {
+        loadProfile();
+      }
+    };
+    
+    // 重置设置
+    function resetSettings() {
+      // 重置主题
+      changeTheme('default');
+      
+      // 重置开关状态
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+      });
+      
+      // 重新显示所有元素
+      document.getElementById('desktop-widgets')?.classList.remove('hidden');
+      document.getElementById('background-watermark')?.classList.remove('hidden');
+      
+      showToast('已恢复默认设置');
+    }
+    
+    // 监听页面加载完成事件
+    document.addEventListener('DOMContentLoaded', function() {
+      initSystem();
+      
+      // 加载Chart.js库（添加加载错误处理和重试机制）
+      function loadChartJS() {
+        const chartScript = document.createElement('script');
+        chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        chartScript.onload = function() {
+          console.log('Chart.js 加载成功');
+          // Chart.js加载完成后的初始化
+          if (currentUser) {
+            loadDashboardData();
+          }
+        };
+        chartScript.onerror = function() {
+          console.error('Chart.js 加载失败，尝试重新加载...');
+          // 2秒后重试加载
+          setTimeout(loadChartJS, 2000);
+        };
+        document.head.appendChild(chartScript);
+      }
+      
+      // 启动加载Chart.js
+      loadChartJS();
+    });
+  </script>
+
+  <div id="history-window" class="fixed w-full max-w-3xl hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+      <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <i class="fa fa-history text-yellow-400"></i>
+          <span>发展历史</span>
+        </div>
+        <div class="window-no-drag flex space-x-2">
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('history-window')">
+            <i class="fa fa-minus text-xs"></i>
+          </button>
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('history-window')">
+            <i class="fa fa-times text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 max-h-[60vh] overflow-y-auto">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-yellow-400 mb-2">飞天神猪教发展历史</h2>
+          <p class="text-gray-400 text-sm">从创立到现在的神圣历程</p>
+        </div>
+        
+        <div class="space-y-6">
+          <!-- 历史时间轴 -->
+          <div class="relative border-l-2 border-yellow-800 pl-6 ml-3 space-y-8">
+            <!-- 创立时期 -->
+            <div class="relative">
+              <div class="absolute -left-9 w-4 h-4 rounded-full bg-yellow-600 border-4 border-gray-900"></div>
+              <h3 class="text-lg font-bold text-yellow-500">创教初期 (2022-2023)</h3>
+              <div class="mt-2 bg-gray-800 p-4 rounded-lg">
+                <p class="text-gray-300">飞天神猪教由圣猪使者在东方神秘之地创立，最初只有少数信徒，但凭借独特的教义和神圣的猪图腾，迅速吸引了第一批忠实追随者。</p>
+                <div class="mt-3 flex justify-between text-xs text-gray-500">
+                  <span>创始人：圣猪使者</span>
+                  <span>创立地点：东方神秘之地</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 快速发展期 -->
+            <div class="relative">
+              <div class="absolute -left-9 w-4 h-4 rounded-full bg-yellow-500 border-4 border-gray-900"></div>
+              <h3 class="text-lg font-bold text-yellow-500">快速发展期 (2023-2024)</h3>
+              <div class="mt-2 bg-gray-800 p-4 rounded-lg">
+                <p class="text-gray-300">随着教义的传播和首批信徒的积极宣传，教会影响力迅速扩大，在多个地区建立了分支，信徒数量突破千人。这一时期，教会确立了五大核心教义和基本仪式规范。</p>
+                <div class="mt-3 flex justify-between text-xs text-gray-500">
+                  <span>信徒数量：1000+</span>
+                  <span>里程碑：确立五大核心教义</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 稳定发展期 -->
+            <div class="relative">
+              <div class="absolute -left-9 w-4 h-4 rounded-full bg-yellow-400 border-4 border-gray-900"></div>
+              <h3 class="text-lg font-bold text-yellow-500">稳定发展期 (2024-至今)</h3>
+              <div class="mt-2 bg-gray-800 p-4 rounded-lg">
+                <p class="text-gray-300">教会进入规范化、制度化发展阶段，建立了完善的组织体系和教徒培养机制。开发了数字化平台，方便全球信徒参与活动和学习教义。飞天神猪教的理念得到更广泛的认同。</p>
+                <div class="mt-3 flex justify-between text-xs text-gray-500">
+                  <span>发展重点：数字化、全球化</span>
+                  <span>当前状态：持续发展中</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 重要事件 -->
+            <div class="relative">
+              <div class="absolute -left-9 w-4 h-4 rounded-full bg-yellow-300 border-4 border-gray-900"></div>
+              <h3 class="text-lg font-bold text-yellow-500">重要历史事件</h3>
+              <div class="mt-2 bg-gray-800 p-4 rounded-lg">
+                <ul class="space-y-2 text-gray-300">
+                  <li class="flex items-start">
+                    <i class="fa fa-star text-yellow-400 mt-1 mr-2"></i>
+                    <span>2023年3月：第一部《神猪经》正式颁布，确立了教会的理论基础</span>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fa fa-star text-yellow-400 mt-1 mr-2"></i>
+                    <span>2023年7月：首次全球信徒大会在圣地召开，来自五大洲的信徒代表参与</span>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fa fa-star text-yellow-400 mt-1 mr-2"></i>
+                    <span>2024年1月：教会数字化平台"飞天神猪桌面系统"正式上线</span>
+                  </li>
+                  <li class="flex items-start">
+                    <i class="fa fa-star text-yellow-400 mt-1 mr-2"></i>
+                    <span>2024年5月：教会慈善基金成立，致力于帮助全球需要帮助的人们</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 仪式实践窗口 -->
+    <div id="ritual-window" class="fixed w-full max-w-3xl hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+      <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <i class="fa fa-magic text-green-400"></i>
+          <span>仪式实践</span>
+        </div>
+        <div class="window-no-drag flex space-x-2">
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('ritual-window')">
+            <i class="fa fa-minus text-xs"></i>
+          </button>
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('ritual-window')">
+            <i class="fa fa-times text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 max-h-[60vh] overflow-y-auto">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-green-400 mb-2">飞天神猪教仪式指南</h2>
+          <p class="text-gray-400 text-sm">神圣的实践方法与规范</p>
+        </div>
+        
+        <!-- 仪式导航 -->
+        <div class="flex overflow-x-auto space-x-3 pb-3 mb-6">
+          <button class="ritual-tab-btn px-4 py-2 rounded-full bg-green-600 text-white whitespace-nowrap active" onclick="showRitualTab('daily-prayer')">每日祷告</button>
+          <button class="ritual-tab-btn px-4 py-2 rounded-full bg-gray-700 text-gray-300 whitespace-nowrap" onclick="showRitualTab('weekly-ritual')">每周仪式</button>
+          <button class="ritual-tab-btn px-4 py-2 rounded-full bg-gray-700 text-gray-300 whitespace-nowrap" onclick="showRitualTab('monthly-celebration')">月度庆典</button>
+          <button class="ritual-tab-btn px-4 py-2 rounded-full bg-gray-700 text-gray-300 whitespace-nowrap" onclick="showRitualTab('initiation')">入教仪式</button>
+        </div>
+        
+        <!-- 仪式内容区域 -->
+        <div class="ritual-content">
+          <!-- 每日祷告 -->
+          <div id="daily-prayer" class="ritual-tab">
+            <div class="bg-gray-800 rounded-lg p-5 mb-4">
+              <h3 class="text-lg font-bold text-green-500 mb-3">每日祷告仪式</h3>
+              <div class="space-y-3 text-gray-300">
+                <p>每日祷告是飞天神猪教最基本的仪式，信徒应在早晨起床后和晚上睡前进行，表达对神猪的敬仰和感恩。</p>
+                <div class="bg-gray-700 rounded p-4 border-l-4 border-green-500">
+                  <h4 class="font-bold text-green-400 mb-2">祷告流程：</h4>
+                  <ol class="list-decimal pl-5 space-y-2">
+                    <li>面向东方，双手合十</li>
+                    <li>默念祷词三次</li>
+                    <li>冥想30秒，感受神猪的庇佑</li>
+                    <li>结束时双手轻拍三下</li>
+                  </ol>
+                </div>
+                <div class="bg-gray-700 rounded p-4 mt-4">
+                  <h4 class="font-bold text-green-400 mb-2">标准祷词：</h4>
+                  <p class="italic text-center text-green-300">"飞天神猪，神圣智慧，赐我力量，佑我安康，阿门。"
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="bg-gray-800 rounded-lg p-5">
+              <h3 class="text-lg font-bold text-green-500 mb-3">祷告计数器</h3>
+              <div class="text-center">
+                <div class="text-4xl font-bold text-green-400 mb-3">0</div>
+                <button class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full transition-colors shadow-md" onclick="incrementPrayerCount(this)">
+                  <i class="fa fa-plus mr-2"></i>记录祷告
+                </button>
+                <p class="text-xs text-gray-500 mt-3">每次完成祷告后点击此按钮记录</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 每周仪式 -->
+          <div id="weekly-ritual" class="ritual-tab hidden">
+            <div class="bg-gray-800 rounded-lg p-5">
+              <h3 class="text-lg font-bold text-green-500 mb-3">每周仪式</h3>
+              <div class="space-y-3 text-gray-300">
+                <p>每周日是飞天神猪教的圣日，信徒应在这一天进行特别的仪式，聚集在一起或独自进行，深化对教义的理解。</p>
+                
+                <div class="bg-gray-700 rounded p-4 border-l-4 border-green-500 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">仪式准备：</h4>
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>准备干净的祭祀空间</li>
+                    <li>点燃特制的神猪香</li>
+                    <li>摆放水果等供品</li>
+                    <li>穿着整洁的衣物</li>
+                  </ul>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">仪式流程：</h4>
+                  <ol class="list-decimal pl-5 space-y-2">
+                    <li>诵读《神猪经》选段</li>
+                    <li>分享一周的感悟</li>
+                    <li>集体冥想10分钟</li>
+                    <li>互相祝福</li>
+                  </ol>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">注意事项：</h4>
+                  <ul class="list-disc pl-5 space-y-1 text-sm">
+                    <li>仪式期间保持专注，避免分心</li>
+                    <li>尊重仪式的神圣性</li>
+                    <li>有条件的信徒应尽量参加集体仪式</li>
+                    <li>仪式后可记录感悟，加深理解</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 月度庆典 -->
+          <div id="monthly-celebration" class="ritual-tab hidden">
+            <div class="bg-gray-800 rounded-lg p-5">
+              <h3 class="text-lg font-bold text-green-500 mb-3">月度庆典</h3>
+              <div class="space-y-3 text-gray-300">
+                <p>每月的最后一个周末，是飞天神猪教的月度庆典日，这是一个重要的集体活动，信徒们聚集在一起，庆祝过去一个月的成长和收获。</p>
+                
+                <div class="bg-gray-700 rounded p-4 border-l-4 border-green-500 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">庆典活动：</h4>
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>神猪舞表演</li>
+                    <li>教义知识竞赛</li>
+                    <li>分享成功案例</li>
+                    <li>集体聚餐</li>
+                  </ul>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">参与方式：</h4>
+                  <ol class="list-decimal pl-5 space-y-2">
+                    <li>通过教会平台报名参加</li>
+                    <li>准备一份小礼物或分享</li>
+                    <li>准时到达指定地点</li>
+                    <li>全程积极参与</li>
+                  </ol>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">下次庆典信息：</h4>
+                  <p class="text-center py-2 bg-gray-600 rounded">
+                    时间：下个月最后一个周末<br>
+                    地点：各地教会中心<br>
+                    主题：神猪的智慧之光
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 入教仪式 -->
+          <div id="initiation" class="ritual-tab hidden">
+            <div class="bg-gray-800 rounded-lg p-5">
+              <h3 class="text-lg font-bold text-green-500 mb-3">入教仪式</h3>
+              <div class="space-y-3 text-gray-300">
+                <p>入教仪式是成为正式飞天神猪教信徒的重要仪式，标志着一个人正式加入教会大家庭，开始神圣的信仰之旅。</p>
+                
+                <div class="bg-gray-700 rounded p-4 border-l-4 border-green-500 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">入教条件：</h4>
+                  <ul class="list-disc pl-5 space-y-1">
+                    <li>认同飞天神猪教的五大核心教义</li>
+                    <li>至少参加过三次每周仪式</li>
+                    <li>完成基础教义学习</li>
+                    <li>有介绍人推荐</li>
+                  </ul>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">仪式流程：</h4>
+                  <ol class="list-decimal pl-5 space-y-2">
+                    <li>在主祭司的带领下宣誓</li>
+                    <li>接受神猪印记</li>
+                    <li>获得信徒证书</li>
+                    <li>接受其他信徒的祝福</li>
+                  </ol>
+                </div>
+                
+                <div class="bg-gray-700 rounded p-4 mt-3">
+                  <h4 class="font-bold text-green-400 mb-2">申请流程：</h4>
+                  <p class="text-center py-2 bg-gray-600 rounded">
+                    1. 联系当地教会<br>
+                    2. 提交入教申请<br>
+                    3. 参加预备课程<br>
+                    4. 参加入教仪式
+                  </p>
+                  <div class="text-center mt-3">
+                    <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm transition-colors">
+                      <i class="fa fa-envelope mr-1"></i>申请入教
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 教徒留言窗口 -->
+    <div id="message-window" class="fixed w-full max-w-3xl hidden bg-gray-900 rounded-lg shadow-2xl overflow-hidden z-40 top-1/4 left-1/2 transform -translate-x-1/2 animate-fade-in">
+      <div class="window-drag bg-gray-800 p-3 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+          <i class="fa fa-comments text-red-400"></i>
+          <span>教徒留言</span>
+        </div>
+        <div class="window-no-drag flex space-x-2">
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="minimizeWindow('message-window')">
+            <i class="fa fa-minus text-xs"></i>
+          </button>
+          <button class="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-600 transition-colors" onclick="closeWindow('message-window')">
+            <i class="fa fa-times text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 max-h-[60vh] overflow-y-auto">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-bold text-red-400 mb-2">教徒留言板</h2>
+          <p class="text-gray-400 text-sm">分享你的感悟与祝福</p>
+        </div>
+        
+        <!-- 留言输入区 -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+          <h3 class="text-lg font-bold text-red-500 mb-3">发表留言</h3>
+          <div class="space-y-3">
+            <textarea id="message-input" rows="3" class="w-full bg-gray-700 border border-gray-600 rounded p-3 text-white focus:outline-none focus:border-red-500 resize-none" placeholder="写下你想对其他教徒说的话..."></textarea>
+            <div class="flex justify-end">
+              <button id="submit-message" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-full transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed" disabled onclick="submitMessage()">
+                <i class="fa fa-paper-plane mr-2"></i>发送留言
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 留言列表 -->
+        <div id="messages-container" class="space-y-4">
+          <!-- 示例留言 -->
+          <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-red-500">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center text-red-300">
+                  <i class="fa fa-user"></i>
+                </div>
+                <span class="font-bold text-red-400">user12</span>
+              </div>
+              <span class="text-xs text-gray-500">2小时前</span>
+            </div>
+            <p class="text-gray-300">感谢飞天神猪的指引，这段时间我的生活发生了很大的变化，感到前所未有的平静和力量。愿神猪的智慧之光永远照耀我们！</p>
+            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-500">
+              <button class="flex items-center space-x-1 hover:text-red-400 transition-colors" onclick="likeMessage(this)">
+                <i class="fa fa-heart-o"></i>
+                <span>12</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-red-500">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center text-red-300">
+                  <i class="fa fa-user"></i>
+                </div>
+                <span class="font-bold text-red-400">user45</span>
+              </div>
+              <span class="text-xs text-gray-500">昨天</span>
+            </div>
+            <p class="text-gray-300">刚刚完成了第一次入教仪式，心情非常激动！感谢教会的所有兄弟姐妹们的支持和鼓励，我会努力学习教义，成为一名优秀的信徒。</p>
+            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-500">
+              <button class="flex items-center space-x-1 hover:text-red-400 transition-colors" onclick="likeMessage(this)">
+                <i class="fa fa-heart-o"></i>
+                <span>8</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="bg-gray-800 rounded-lg p-4 border-l-4 border-red-500">
+            <div class="flex justify-between items-center mb-2">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center text-red-300">
+                  <i class="fa fa-user"></i>
+                </div>
+                <span class="font-bold text-red-400">user78</span>
+              </div>
+              <span class="text-xs text-gray-500">3天前</span>
+            </div>
+            <p class="text-gray-300">每周的仪式让我收获颇丰，特别是冥想环节，帮助我减轻了工作压力。希望更多的人能了解飞天神猪教，感受到神猪的智慧和力量。</p>
+            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-500">
+              <button class="flex items-center space-x-1 hover:text-red-400 transition-colors" onclick="likeMessage(this)">
+                <i class="fa fa-heart-o"></i>
+                <span>15</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 仪式标签切换功能
+      function showRitualTab(tabId) {
+        // 隐藏所有标签内容
+        document.querySelectorAll('.ritual-tab').forEach(tab => {
+          tab.classList.add('hidden');
+        });
+        
+        // 重置所有按钮样式
+        document.querySelectorAll('.ritual-tab-btn').forEach(btn => {
+          btn.className = 'ritual-tab-btn px-4 py-2 rounded-full bg-gray-700 text-gray-300 whitespace-nowrap';
+        });
+        
+        // 显示选中的标签内容
+        document.getElementById(tabId).classList.remove('hidden');
+        
+        // 高亮选中的按钮
+        const activeBtn = Array.from(document.querySelectorAll('.ritual-tab-btn')).find(btn => {
+          return btn.getAttribute('onclick') === `showRitualTab('${tabId}')`;
+        });
+        if (activeBtn) {
+          activeBtn.className = 'ritual-tab-btn px-4 py-2 rounded-full bg-green-600 text-white whitespace-nowrap active';
+        }
+      }
+      
+      // 祷告计数器功能
+      function incrementPrayerCount(button) {
+        const counterElement = button.parentElement.querySelector('div.text-4xl');
+        let count = parseInt(counterElement.textContent);
+        count++;
+        counterElement.textContent = count;
+        
+        // 保存到本地存储
+        const userKey = currentUser ? `prayerCount_${currentUser.username}` : 'prayerCount';
+        localStorage.setItem(userKey, count.toString());
+        
+        showToast('祷告记录已保存');
+      }
+      
+      // 加载保存的祷告次数
+      function loadPrayerCount() {
+        const userKey = currentUser ? `prayerCount_${currentUser.username}` : 'prayerCount';
+        const savedCount = localStorage.getItem(userKey);
+        if (savedCount && document.getElementById('daily-prayer')) {
+          const counterElement = document.querySelector('#daily-prayer .text-4xl');
+          if (counterElement) {
+            counterElement.textContent = savedCount;
+          }
+        }
+      }
+      
+      // 留言功能
+      document.getElementById('message-input')?.addEventListener('input', function() {
+        const submitBtn = document.getElementById('submit-message');
+        if (this.value.trim()) {
+          submitBtn.disabled = false;
+        } else {
+          submitBtn.disabled = true;
+        }
+      });
+      
+      function submitMessage() {
+        if (!currentUser) {
+          showToast('请先登录后再发表留言');
+          return;
+        }
+        
+        const messageInput = document.getElementById('message-input');
+        const messageText = messageInput.value.trim();
+        
+        if (!messageText) return;
+        
+        // 创建新留言
+        const messagesContainer = document.getElementById('messages-container');
+        const newMessage = document.createElement('div');
+        newMessage.className = 'bg-gray-800 rounded-lg p-4 border-l-4 border-red-500';
+        newMessage.innerHTML = `
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center text-red-300">
+                <i class="fa fa-user"></i>
+              </div>
+              <span class="font-bold text-red-400">${currentUser.username}</span>
+            </div>
+            <span class="text-xs text-gray-500">刚刚</span>
+          </div>
+          <p class="text-gray-300">${messageText}</p>
+          <div class="flex items-center space-x-4 mt-3 text-xs text-gray-500">
+            <button class="flex items-center space-x-1 hover:text-red-400 transition-colors" onclick="likeMessage(this)">
+              <i class="fa fa-heart-o"></i>
+              <span>0</span>
+            </button>
+          </div>
+        `;
+        
+        // 添加到列表顶部
+        messagesContainer.insertBefore(newMessage, messagesContainer.firstChild);
+        
+        // 清空输入框
+        messageInput.value = '';
+        document.getElementById('submit-message').disabled = true;
+        
+        // 保存到本地存储
+        saveMessageToStorage(currentUser.username, messageText);
+        
+        showToast('留言已发布');
+      }
+      
+      function saveMessageToStorage(username, content) {
+        const messagesKey = 'feitianMessages';
+        const messages = JSON.parse(localStorage.getItem(messagesKey) || '[]');
+        
+        messages.push({
+          id: Date.now(),
+          username: username,
+          content: content,
+          timestamp: new Date().toISOString(),
+          likes: 0
+        });
+        
+        // 最多保存50条留言
+        if (messages.length > 50) {
+          messages.shift();
+        }
+        
+        localStorage.setItem(messagesKey, JSON.stringify(messages));
+      }
+      
+      function loadMessagesFromStorage() {
+        const messagesKey = 'feitianMessages';
+        const messages = JSON.parse(localStorage.getItem(messagesKey) || '[]');
+        
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer && messages.length > 0) {
+          // 清空示例留言
+          messagesContainer.innerHTML = '';
+          
+          // 显示保存的留言
+          messages.reverse().forEach(message => {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'bg-gray-800 rounded-lg p-4 border-l-4 border-red-500';
+            
+            // 计算相对时间
+            const relativeTime = getRelativeTime(message.timestamp);
+            
+            messageElement.innerHTML = `
+              <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 rounded-full bg-red-500/30 flex items-center justify-center text-red-300">
+                    <i class="fa fa-user"></i>
+                  </div>
+                  <span class="font-bold text-red-400">${message.username}</span>
+                </div>
+                <span class="text-xs text-gray-500">${relativeTime}</span>
+              </div>
+              <p class="text-gray-300">${message.content}</p>
+              <div class="flex items-center space-x-4 mt-3 text-xs text-gray-500">
+                <button class="flex items-center space-x-1 hover:text-red-400 transition-colors" onclick="likeMessage(this, ${message.id})">
+                  <i class="fa fa-heart-o"></i>
+                  <span>${message.likes}</span>
+                </button>
+              </div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+          });
+        }
+      }
+      
+      function getRelativeTime(timestamp) {
+        const now = new Date();
+        const messageDate = new Date(timestamp);
+        const diffInSeconds = Math.floor((now - messageDate) / 1000);
+        
+        if (diffInSeconds < 60) {
+          return '刚刚';
+        } else if (diffInSeconds < 3600) {
+          return Math.floor(diffInSeconds / 60) + '分钟前';
+        } else if (diffInSeconds < 86400) {
+          return Math.floor(diffInSeconds / 3600) + '小时前';
+        } else if (diffInSeconds < 604800) {
+          return Math.floor(diffInSeconds / 86400) + '天前';
+        } else {
+          return messageDate.toLocaleDateString('zh-CN');
+        }
+      }
+      
+      function likeMessage(button, messageId) {
+        const iconElement = button.querySelector('i');
+        const countElement = button.querySelector('span');
+        let count = parseInt(countElement.textContent);
+        
+        if (iconElement.classList.contains('fa-heart-o')) {
+          // 点赞
+          iconElement.className = 'fa fa-heart text-red-500';
+          count++;
+        } else {
+          // 取消点赞
+          iconElement.className = 'fa fa-heart-o';
+          count--;
+        }
+        
+        countElement.textContent = count;
+        
+        // 如果有messageId，更新本地存储
+        if (messageId) {
+          const messagesKey = 'feitianMessages';
+          const messages = JSON.parse(localStorage.getItem(messagesKey) || '[]');
+          const message = messages.find(m => m.id === messageId);
+          if (message) {
+            message.likes = count;
+            localStorage.setItem(messagesKey, JSON.stringify(messages));
+          }
+        }
+      }
+      
+      // 修改openWindow函数，添加加载祷告次数和留言的逻辑
+      const originalOpenWindowWithMessages = openWindow;
+      openWindow = function(windowId) {
+        originalOpenWindowWithMessages(windowId);
+        
+        if (windowId === 'ritual-window') {
+          setTimeout(loadPrayerCount, 100);
+        } else if (windowId === 'message-window') {
+          setTimeout(loadMessagesFromStorage, 100);
+        }
+      };
+   </body>
+</html>
